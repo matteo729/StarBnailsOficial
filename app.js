@@ -649,16 +649,56 @@ function mostrarTurnos(turnos = turnosCargados) {
 }
 
 async function eliminarTurno(id) {
-    if (confirm('¿Eliminar este turno?')) {
-        const { error } = await supabaseClient
+    if (!confirm('¿Eliminar este turno?')) return;
+    
+    try {
+        // 1️⃣ PRIMERO: obtener los datos del turno para saber qué imagen eliminar
+        const { data: turno, error: fetchError } = await supabaseClient
+            .from('turnos')
+            .select('*')
+            .eq('id', id)
+            .single();
+        
+        if (fetchError) throw fetchError;
+        
+        // 2️⃣ SEGUNDO: eliminar la imagen del Storage
+        if (turno?.imagen_url) {
+            // Extraer el nombre del archivo de la URL
+            // La URL es algo como: https://.../storage/v1/object/public/imagenes-uvas/nombre-archivo.jpg
+            const urlParts = turno.imagen_url.split('/');
+            const fileName = urlParts[urlParts.length - 1]; // Última parte = nombre del archivo
+            
+            console.log('Eliminando imagen:', fileName);
+            
+            const { error: storageError } = await supabaseClient.storage
+                .from('imagenes-uvas')
+                .remove([fileName]);
+            
+            if (storageError) {
+                console.error('Error eliminando imagen:', storageError);
+                // Continuamos igual, intentamos eliminar el turno
+            }
+        }
+        
+        // 3️⃣ TERCERO: eliminar el turno de la base de datos
+        const { error: deleteError } = await supabaseClient
             .from('turnos')
             .delete()
             .eq('id', id);
         
-        if (!error) {
-            mostrarNotificacion('Turno eliminado', 'success');
-            setTimeout(() => location.reload(), 1000);
-        }
+        if (deleteError) throw deleteError;
+        
+        // 4️⃣ ÉXITO
+        mostrarNotificacion('Turno e imagen eliminados', 'success');
+        
+        // Recargar después de 1 segundo
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+        
+    } catch (error) {
+        console.error('Error eliminando turno:', error);
+        mostrarNotificacion('Error: ' + error.message, 'error');
     }
 }
 
@@ -792,4 +832,5 @@ window.desbloquearDia = desbloquearDia;
 window.eliminarTurno = eliminarTurno;
 window.initClientePage = initClientePage;
 window.initAdminPage = initAdminPage;
+
 
