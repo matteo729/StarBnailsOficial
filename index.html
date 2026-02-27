@@ -3,68 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>STARBNAILS · turnos</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>starbnails · belleza para tus uñas</title>
+    
+    <!-- Fonts e íconos -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital@0;1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Estilos -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <div class="container">
-        <!-- Header delicado -->
+        <!-- Header con diseño editorial -->
         <header>
-            <div class="logo">
-                <h1>StarBnails</h1>
+            <div class="logo-wrapper">
+                <h1 class="logo">starbnails</h1>
                 <span class="logo-dot"></span>
             </div>
-            <p class="subtitulo">Reservá tu turno para uñas</p>
+            <p class="subtitulo">nail artistry · turnos online</p>
+            <div class="header-divider">
+                <span></span>
+                <i class="far fa-star"></i>
+                <span></span>
+            </div>
         </header>
 
-        <!-- Progress bar simple -->
+        <!-- Progress bar elegante -->
         <div class="progress-bar" data-step="1">
             <div class="progress-step active">
-                <div class="step-number">1</div>
-                <span>Tus datos</span>
+                <div class="step-number">01</div>
+                <span>tus datos</span>
             </div>
             <div class="progress-step">
-                <div class="step-number">2</div>
-                <span>Fecha</span>
+                <div class="step-number">02</div>
+                <span>fecha</span>
             </div>
             <div class="progress-step">
-                <div class="step-number">3</div>
-                <span>Confirmar</span>
+                <div class="step-number">03</div>
+                <span>confirmar</span>
             </div>
         </div>
 
-        <!-- PASO 1 - Datos personales (CORREGIDO: file upload funciona) -->
+        <!-- PASO 1 - Datos personales -->
         <div class="step-content active" id="step1">
             <div class="card">
                 <div class="card-header">
-                    <h2><i class="far fa-user-circle"></i> Tus datos</h2>
-                    <p>Completá tu información</p>
+                    <h2><i class="far fa-user-circle"></i> información personal</h2>
+                    <p>completá tus datos para la reserva</p>
                 </div>
                 
                 <div class="form-group floating">
                     <input type="text" id="nombre" required placeholder=" ">
-                    <label>Nombre</label>
+                    <label>nombre</label>
                     <i class="fas fa-heart input-icon"></i>
                 </div>
                 
                 <div class="form-group floating">
                     <input type="text" id="apellido" required placeholder=" ">
-                    <label>Apellido</label>
+                    <label>apellido</label>
                     <i class="fas fa-heart input-icon"></i>
                 </div>
                 
-                <!-- ✅ FILE UPLOAD CORREGIDO - AHORA FUNCIONA -->
                 <div class="form-group file-upload">
                     <label for="imagen" class="file-label">
                         <i class="far fa-images"></i>
-                        <span>Subí tu diseño</span>
-                        <small>hacé clic para elegir</small>
+                        <span>subí tu diseño</span>
+                        <small>hacé clic para elegir (máx 5MB)</small>
                     </label>
                     <input type="file" id="imagen" accept="image/*" required>
                     <div id="preview-container" class="preview-container">
-                        <img id="preview" src="#" alt="preview" style="display: none;">
+                        <img id="preview" src="#" alt="vista previa" style="display: none;">
                     </div>
                 </div>
                 
@@ -78,8 +91,8 @@
         <div class="step-content" id="step2">
             <div class="card">
                 <div class="card-header">
-                    <h2><i class="far fa-calendar-alt"></i> elegí tu día</h2>
-                    <p>seleccioná una fecha disponible</p>
+                    <h2><i class="far fa-calendar-alt"></i> seleccioná tu día</h2>
+                    <p>elegí una fecha disponible</p>
                 </div>
 
                 <div class="calendar-wrapper">
@@ -99,7 +112,7 @@
                 <div class="legend">
                     <div class="legend-item"><span class="dot available"></span> libre</div>
                     <div class="legend-item"><span class="dot ocupado"></span> ocupado</div>
-                    <div class="legend-item"><span class="dot weekend"></span> finde</div>
+                    <div class="legend-item"><span class="dot weekend"></span> fin de semana</div>
                     <div class="legend-item"><span class="dot pasado"></span> pasado</div>
                 </div>
 
@@ -114,8 +127,8 @@
         <div class="step-content" id="step3">
             <div class="card">
                 <div class="card-header">
-                    <h2><i class="far fa-clock"></i> elegí tu hora</h2>
-                    <p id="fecha-seleccionada-display" class="fecha-display">seleccioná un día</p>
+                    <h2><i class="far fa-clock"></i> elegí tu horario</h2>
+                    <p id="fecha-seleccionada-display" class="fecha-display">seleccioná un día primero</p>
                 </div>
 
                 <div id="horarios-container" class="horarios-grid">
@@ -123,7 +136,7 @@
                 </div>
 
                 <div class="resumen-card">
-                    <h3><i class="far fa-check-circle"></i> resumen</h3>
+                    <h3><i class="far fa-check-circle"></i> resumen de tu reserva</h3>
                     <div id="resumen-contenido" class="resumen-contenido">
                         <p class="text-muted">completá los datos</p>
                     </div>
@@ -137,13 +150,23 @@
                 </div>
             </div>
         </div>
+
+        <!-- Footer con créditos -->
+        <footer class="site-footer">
+            <div class="footer-divider"></div>
+            <p class="footer-text">
+                <i class="far fa-gem"></i>
+                desarrollado & diseñado por <strong>Orion Studios</strong>
+                <i class="far fa-gem"></i>
+            </p>
+        </footer>
     </div>
 
     <!-- Modal de confirmación -->
     <div id="success-modal" class="modal">
         <div class="modal-content">
-            <div class="modal-icon">💖</div>
-            <h2>¡turno reservado!</h2>
+            <div class="modal-icon">✨</div>
+            <h2>¡turno confirmado!</h2>
             <p>te esperamos</p>
             <div class="modal-detalle"></div>
             <button onclick="closeModal()" class="btn-modal">listo</button>
@@ -160,7 +183,3 @@
     </script>
 </body>
 </html>
-
-
-
-
