@@ -816,3 +816,4 @@ window.eliminarTurno = eliminarTurno;
 window.closeModal = closeModal;
 window.initClientePage = initClientePage;
 window.initAdminPage = initAdminPage;
+
