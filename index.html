@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>starbnails · belleza para tus uñas</title>
+    <title>StarBnails · Belleza para tus uñas</title>
     
     <!-- Fonts e íconos -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,7 +25,7 @@
                 <h1 class="logo">starbnails</h1>
                 <span class="logo-dot"></span>
             </div>
-            <p class="subtitulo">nail artistry · turnos online</p>
+            <p class="subtitulo">Ana Bustamante · Turnos online</p>
             <div class="header-divider">
                 <span></span>
                 <i class="far fa-star"></i>
@@ -37,7 +37,7 @@
         <div class="progress-bar" data-step="1">
             <div class="progress-step active">
                 <div class="step-number">01</div>
-                <span>tus datos</span>
+                <span>Tus datos</span>
             </div>
             <div class="progress-step">
                 <div class="step-number">02</div>
@@ -45,7 +45,7 @@
             </div>
             <div class="progress-step">
                 <div class="step-number">03</div>
-                <span>confirmar</span>
+                <span>Confirmar</span>
             </div>
         </div>
 
@@ -53,26 +53,26 @@
         <div class="step-content active" id="step1">
             <div class="card">
                 <div class="card-header">
-                    <h2><i class="far fa-user-circle"></i> información personal</h2>
-                    <p>completá tus datos para la reserva</p>
+                    <h2><i class="far fa-user-circle"></i> Información personal</h2>
+                    <p>Completá tus datos para la reserva</p>
                 </div>
                 
                 <div class="form-group floating">
                     <input type="text" id="nombre" required placeholder=" ">
-                    <label>nombre</label>
+                    <label>Nombre</label>
                     <i class="fas fa-heart input-icon"></i>
                 </div>
                 
                 <div class="form-group floating">
                     <input type="text" id="apellido" required placeholder=" ">
-                    <label>apellido</label>
+                    <label>Apellido</label>
                     <i class="fas fa-heart input-icon"></i>
                 </div>
                 
                 <div class="form-group file-upload">
                     <label for="imagen" class="file-label">
                         <i class="far fa-images"></i>
-                        <span>subí tu diseño</span>
+                        <span>Subí tu diseño</span>
                         <small>hacé clic para elegir (máx 5MB)</small>
                     </label>
                     <input type="file" id="imagen" accept="image/*" required>
@@ -82,7 +82,7 @@
                 </div>
                 
                 <button class="btn-next" onclick="nextStep(2)" id="btn-to-step2">
-                    continuar <i class="fas fa-arrow-right"></i>
+                    Continuar <i class="fas fa-arrow-right"></i>
                 </button>
             </div>
         </div>
@@ -91,14 +91,14 @@
         <div class="step-content" id="step2">
             <div class="card">
                 <div class="card-header">
-                    <h2><i class="far fa-calendar-alt"></i> seleccioná tu día</h2>
-                    <p>elegí una fecha disponible</p>
+                    <h2><i class="far fa-calendar-alt"></i> Seleccioná tu día</h2>
+                    <p>Elegí una fecha disponible</p>
                 </div>
 
                 <div class="calendar-wrapper">
                     <div class="calendar-header">
                         <button id="prev-month" class="btn-circle"><i class="fas fa-chevron-left"></i></button>
-                        <h3 id="current-month" class="month-title">febrero 2026</h3>
+                        <h3 id="current-month" class="month-title">Febrero 2026</h3>
                         <button id="next-month" class="btn-circle"><i class="fas fa-chevron-right"></i></button>
                     </div>
                     
@@ -110,15 +110,15 @@
                 </div>
 
                 <div class="legend">
-                    <div class="legend-item"><span class="dot available"></span> libre</div>
-                    <div class="legend-item"><span class="dot ocupado"></span> ocupado</div>
-                    <div class="legend-item"><span class="dot weekend"></span> fin de semana</div>
-                    <div class="legend-item"><span class="dot pasado"></span> pasado</div>
+                    <div class="legend-item"><span class="dot available"></span> Libre</div>
+                    <div class="legend-item"><span class="dot ocupado"></span> Ocupado</div>
+                    <div class="legend-item"><span class="dot weekend"></span> Fin de semana</div>
+                    <div class="legend-item"><span class="dot pasado"></span> Pasado</div>
                 </div>
 
                 <div class="navigation-buttons">
                     <button class="btn-back" onclick="prevStep(1)"><i class="fas fa-arrow-left"></i> atrás</button>
-                    <button class="btn-next" onclick="nextStep(3)" disabled id="btn-to-step3">continuar <i class="fas fa-arrow-right"></i></button>
+                    <button class="btn-next" onclick="nextStep(3)" disabled id="btn-to-step3">Continuar <i class="fas fa-arrow-right"></i></button>
                 </div>
             </div>
         </div>
@@ -127,8 +127,8 @@
         <div class="step-content" id="step3">
             <div class="card">
                 <div class="card-header">
-                    <h2><i class="far fa-clock"></i> elegí tu horario</h2>
-                    <p id="fecha-seleccionada-display" class="fecha-display">seleccioná un día primero</p>
+                    <h2><i class="far fa-clock"></i> Elegí tu horario</h2>
+                    <p id="fecha-seleccionada-display" class="fecha-display">Seleccioná un día primero</p>
                 </div>
 
                 <div id="horarios-container" class="horarios-grid">
@@ -136,16 +136,16 @@
                 </div>
 
                 <div class="resumen-card">
-                    <h3><i class="far fa-check-circle"></i> resumen de tu reserva</h3>
+                    <h3><i class="far fa-check-circle"></i> Resumen de tu reserva</h3>
                     <div id="resumen-contenido" class="resumen-contenido">
-                        <p class="text-muted">completá los datos</p>
+                        <p class="text-muted">Completá los datos</p>
                     </div>
                 </div>
 
                 <div class="navigation-buttons">
-                    <button class="btn-back" onclick="prevStep(2)"><i class="fas fa-arrow-left"></i> atrás</button>
+                    <button class="btn-back" onclick="prevStep(2)"><i class="fas fa-arrow-left"></i> Atrás</button>
                     <button id="reservar-btn" class="btn-reservar">
-                        <i class="fab fa-whatsapp"></i> reservar turno
+                        <i class="fab fa-whatsapp"></i> Reservar turno
                     </button>
                 </div>
             </div>
@@ -156,7 +156,7 @@
             <div class="footer-divider"></div>
             <p class="footer-text">
                 <i class="far fa-gem"></i>
-                desarrollado & diseñado por <strong>Orion Studios</strong>
+                Desarrollado & diseñado por <strong>Orion Studios</strong>
                 <i class="far fa-gem"></i>
             </p>
         </footer>
@@ -183,3 +183,4 @@
     </script>
 </body>
 </html>
+
