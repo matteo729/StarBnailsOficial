@@ -406,21 +406,31 @@ async function reservarTurno() {
     const apellido = document.getElementById('apellido')?.value?.trim();
     
     if (!nombre || !apellido || !archivoImagen || !fechaSeleccionada || !horaSeleccionada) {
-        mostrarNotificacion('Completá todos los campos 💅', 'error');
+        mostrarNotificacion('Completá todos los campos', 'error');
         return;
     }
     
     const btnReservar = document.getElementById('reservar-btn');
     const textoOriginal = btnReservar.innerHTML;
     btnReservar.disabled = true;
-    btnReservar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+    btnReservar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> procesando...';
     
     try {
         // Subir imagen primero
-        mostrarNotificacion('Subiendo imagen...', 'info');
-        const imagenUrl = await subirImagen();
+        mostrarNotificacion('subiendo imagen...', 'info');
         
-        if (!imagenUrl) throw new Error('No se pudo subir la imagen');
+        const fileExt = archivoImagen.name.split('.').pop();
+        const fileName = `${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError } = await supabaseClient.storage
+            .from('imagenes-uvas')
+            .upload(fileName, archivoImagen);
+        
+        if (uploadError) throw uploadError;
+        
+        const { data: { publicUrl } } = supabaseClient.storage
+            .from('imagenes-uvas')
+            .getPublicUrl(fileName);
         
         // Guardar en Supabase
         const { error: dbError } = await supabaseClient
@@ -430,23 +440,23 @@ async function reservarTurno() {
                 apellido: apellido,
                 fecha: fechaSeleccionada,
                 hora: horaSeleccionada,
-                imagen_url: imagenUrl
+                imagen_url: publicUrl
             }]);
         
         if (dbError) throw dbError;
         
-        // Formatear mensaje de WhatsApp
+        // ✅ CORREGIDO PARA IPHONE: crear enlace de WhatsApp
         const fechaLegible = formatearFechaWhatsApp(fechaSeleccionada);
         const mensaje = `Hola, me llamo ${nombre} ${apellido}, reservé un turno para el día ${fechaLegible} a las ${horaSeleccionada}.`;
-        
-        // Codificar mensaje para URL
         const mensajeCodificado = encodeURIComponent(mensaje);
+        const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${mensajeCodificado}`;
         
-        // Abrir WhatsApp
-        window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${mensajeCodificado}`, '_blank');
+        // ✅ IPHONE FIX: usar location.href en lugar de window.open
+        // Esto funciona mejor en iOS porque no es bloqueado por popup blockers
+        window.location.href = whatsappUrl;
         
         // Mostrar éxito
-        mostrarNotificacion('¡Turno reservado! Redirigiendo a WhatsApp...', 'success');
+        mostrarNotificacion('¡turno reservado!', 'success');
         
         // Resetear después de 2 segundos
         setTimeout(() => {
@@ -455,7 +465,7 @@ async function reservarTurno() {
         
     } catch (error) {
         console.error('Error:', error);
-        mostrarNotificacion('Error al reservar: ' + error.message, 'error');
+        mostrarNotificacion('error: ' + error.message, 'error');
         btnReservar.disabled = false;
         btnReservar.innerHTML = textoOriginal;
     }
@@ -782,3 +792,4 @@ window.desbloquearDia = desbloquearDia;
 window.eliminarTurno = eliminarTurno;
 window.initClientePage = initClientePage;
 window.initAdminPage = initAdminPage;
+
