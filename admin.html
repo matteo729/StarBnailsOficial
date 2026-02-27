@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STARBNAILS ✨ - Panel Admin</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="admin-body">
+    <div class="admin-container">
+        <header class="admin-header fade-in">
+            <div class="admin-header-content">
+                <h1><i class="fas fa-crown"></i> Panel Admin</h1>
+                <p>Gestioná tus turnos con estilo ✨</p>
+            </div>
+            <a href="index.html" class="btn-home">
+                <i class="fas fa-arrow-left"></i>
+                <span>Volver a la web</span>
+            </a>
+        </header>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid slide-up">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+                <div class="stat-info">
+                    <h3 id="stats-hoy">0</h3>
+                    <p>Turnos hoy</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+                <div class="stat-info">
+                    <h3 id="stats-semana">0</h3>
+                    <p>Esta semana</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                <div class="stat-info">
+                    <h3 id="stats-pendientes">0</h3>
+                    <p>Próximos</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs elegantes -->
+        <div class="admin-tabs slide-up">
+            <button class="tab-btn active" onclick="showTab('turnos')">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Turnos</span>
+            </button>
+            <button class="tab-btn" onclick="showTab('horarios')">
+                <i class="fas fa-clock"></i>
+                <span>Horarios</span>
+            </button>
+            <button class="tab-btn" onclick="showTab('bloqueos')">
+                <i class="fas fa-ban"></i>
+                <span>Días bloqueados</span>
+            </button>
+        </div>
+
+        <!-- Pestaña Turnos -->
+        <div id="turnos-tab" class="tab-content active fade-in">
+            <div class="turnos-filters">
+                <button class="filter-btn active" data-filter="all">Todos</button>
+                <button class="filter-btn" data-filter="hoy">Hoy</button>
+                <button class="filter-btn" data-filter="semana">Esta semana</button>
+            </div>
+            <div id="turnos-list" class="turnos-grid"></div>
+        </div>
+
+        <!-- Pestaña Horarios -->
+        <div id="horarios-tab" class="tab-content fade-in">
+            <div class="admin-card">
+                <h3><i class="fas fa-plus-circle"></i> Agregar nuevo horario</h3>
+                <div class="add-horario">
+                    <div class="input-group">
+                        <i class="fas fa-clock"></i>
+                        <input type="time" id="nuevo-horario" step="3600">
+                    </div>
+                    <button onclick="agregarHorario()" class="btn-add">
+                        <i class="fas fa-plus"></i> Agregar
+                    </button>
+                </div>
+            </div>
+            
+            <div class="admin-card">
+                <h3><i class="fas fa-list"></i> Horarios disponibles</h3>
+                <div id="horarios-list" class="horarios-admin-grid"></div>
+            </div>
+        </div>
+
+        <!-- Pestaña Días bloqueados -->
+        <div id="bloqueos-tab" class="tab-content fade-in">
+            <div class="admin-card">
+                <h3><i class="fas fa-ban"></i> Bloquear día completo</h3>
+                <div class="add-bloqueo">
+                    <div class="input-group">
+                        <i class="fas fa-calendar-day"></i>
+                        <input type="date" id="fecha-bloqueo">
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-pen"></i>
+                        <input type="text" id="motivo-bloqueo" placeholder="Motivo (opcional)">
+                    </div>
+                    <button onclick="bloquearDia()" class="btn-block">
+                        <i class="fas fa-lock"></i> Bloquear
+                    </button>
+                </div>
+            </div>
+            
+            <div class="admin-card">
+                <h3><i class="fas fa-list"></i> Días bloqueados</h3>
+                <div id="bloqueos-list" class="bloqueos-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof initAdminPage === 'function') {
+                initAdminPage();
+            } else {
+                console.error('initAdminPage no está definida');
+            }
+        });
+    </script>
+</body>
+</html>

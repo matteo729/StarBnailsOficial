@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>STARBNAILS ✨ - Reserva tu turno</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- WhatsApp Button Flotante -->
+    <a href="https://wa.me/5491123456789?text=Hola!%20Quiero%20consultar%20por%20turnos%20✨" 
+       class="whatsapp-float" 
+       target="_blank">
+        <i class="fab fa-whatsapp"></i>
+        <span>Consultar</span>
+    </a>
+
+    <div class="container">
+        <header class="fade-in">
+            <div class="logo">
+                <h1>STARBNAILS</h1>
+                <div class="sparkles"></div>
+            </div>
+            <p class="subtitulo">Diseño de uñas profesional</p>
+            <div class="header-decoration">
+                <span>💅</span>
+                <span>✨</span>
+                <span>🌸</span>
+            </div>
+        </header>
+
+        <div class="progress-bar">
+            <div class="progress-step active" data-step="1">
+                <div class="step-number">1</div>
+                <span>Tus datos</span>
+            </div>
+            <div class="progress-step" data-step="2">
+                <div class="step-number">2</div>
+                <span>Elegí fecha</span>
+            </div>
+            <div class="progress-step" data-step="3">
+                <div class="step-number">3</div>
+                <span>Confirmar</span>
+            </div>
+        </div>
+
+        <!-- Paso 1: Datos personales -->
+        <div class="step-content active" id="step1">
+            <div class="card slide-up">
+                <div class="card-header">
+                    <h2><i class="fas fa-user"></i> Tus datos</h2>
+                    <p>Completá tu información para la reserva</p>
+                </div>
+                
+                <form id="cliente-form" class="form-animated">
+                    <div class="form-group floating">
+                        <input type="text" id="nombre" required placeholder=" ">
+                        <label for="nombre">Nombre <span class="required">*</span></label>
+                        <i class="fas fa-user input-icon"></i>
+                    </div>
+                    
+                    <div class="form-group floating">
+                        <input type="text" id="apellido" required placeholder=" ">
+                        <label for="apellido">Apellido <span class="required">*</span></label>
+                        <i class="fas fa-user input-icon"></i>
+                    </div>
+                    
+                    <div class="form-group file-upload">
+                        <label for="imagen" class="file-label">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span>Subí tu diseño de uñas</span>
+                            <small>Hacé clic o arrastrá la imagen</small>
+                        </label>
+                        <input type="file" id="imagen" accept="image/*" required>
+                        <div id="preview-container" class="preview-container">
+                            <img id="preview" src="#" alt="Vista previa">
+                        </div>
+                    </div>
+                </form>
+                
+                <button class="btn-next" onclick="nextStep(2)">
+                    Continuar <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Paso 2: Calendario -->
+        <div class="step-content" id="step2">
+            <div class="card slide-up">
+                <div class="card-header">
+                    <h2><i class="far fa-calendar-alt"></i> Elegí tu fecha</h2>
+                    <p>Seleccioná el día que te quede mejor</p>
+                </div>
+
+                <div class="calendar-wrapper">
+                    <div class="calendar-header">
+                        <button id="prev-month" class="btn-circle"><i class="fas fa-chevron-left"></i></button>
+                        <h3 id="current-month" class="month-title"></h3>
+                        <button id="next-month" class="btn-circle"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    
+                    <div class="calendar-weekdays">
+                        <div>LUN</div><div>MAR</div><div>MIÉ</div><div>JUE</div><div>VIE</div><div>SÁB</div><div>DOM</div>
+                    </div>
+                    
+                    <div id="calendar-days" class="calendar-days"></div>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item"><span class="dot available"></span> Disponible</div>
+                    <div class="legend-item"><span class="dot ocupado"></span> Ocupado</div>
+                    <div class="legend-item"><span class="dot weekend"></span> Finde (no disponible)</div>
+                </div>
+
+                <div class="navigation-buttons">
+                    <button class="btn-back" onclick="prevStep(1)">
+                        <i class="fas fa-arrow-left"></i> Atrás
+                    </button>
+                    <button class="btn-next" onclick="nextStep(3)" disabled id="btn-to-step3">
+                        Continuar <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Paso 3: Horarios y confirmación -->
+        <div class="step-content" id="step3">
+            <div class="card slide-up">
+                <div class="card-header">
+                    <h2><i class="far fa-clock"></i> Horarios disponibles</h2>
+                    <p id="fecha-seleccionada-display" class="fecha-seleccionada"></p>
+                </div>
+
+                <div id="horarios-container" class="horarios-grid fade-in"></div>
+
+                <div class="resumen-card">
+                    <h3><i class="fas fa-clipboard-check"></i> Resumen de tu reserva</h3>
+                    <div id="resumen-contenido" class="resumen-contenido">
+                        <!-- Se llena con JS -->
+                    </div>
+                </div>
+
+                <div class="navigation-buttons">
+                    <button class="btn-back" onclick="prevStep(2)">
+                        <i class="fas fa-arrow-left"></i> Atrás
+                    </button>
+                    <button id="reservar-btn" class="btn-reservar pulse">
+                        <i class="fas fa-calendar-check"></i>
+                        Confirmar reserva
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito -->
+    <div id="success-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-icon">✨</div>
+            <h2>¡Turno reservado!</h2>
+            <p>Te esperamos en tu turno</p>
+            <p class="modal-detalle"></p>
+            <button onclick="closeModal()" class="btn-modal">Perfecto</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof initClientePage === 'function') {
+                initClientePage();
+            } else {
+                console.error('initClientePage no está definida');
+            }
+        });
+    </script>
+</body>
+</html>
