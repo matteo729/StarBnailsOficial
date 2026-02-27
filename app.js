@@ -1,7 +1,10 @@
-// Configuración de Supabase - CON TUS DATOS
+// Configuración de Supabase
 const SUPABASE_URL = 'https://linuhhqhtxrodrzuheeu.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpbnVoaHFodHhyb2RyenVoZWV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMTUyMjAsImV4cCI6MjA4Nzc5MTIyMH0.oPyRsa6ZcrhijDFT-FQKjvkPTYvW5sE8C_aEt-OQ0Vc';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Número de WhatsApp (sin espacios ni símbolos, solo números)
+const WHATSAPP_NUMBER = '5493804949550';
 
 // Variables globales
 let fechaActual = new Date();
@@ -11,6 +14,7 @@ let turnosCargados = [];
 let horariosDisponibles = [];
 let diasBloqueados = [];
 let archivoImagen = null;
+let imagenPublicUrl = null;
 let currentStep = 1;
 
 // ========== FUNCIONES COMPARTIDAS ==========
@@ -53,40 +57,47 @@ function formatearFecha(fecha) {
 
 function formatearFechaLegible(fechaStr) {
     if (!fechaStr) return '';
-    const partes = fechaStr.split('-');
-    if (partes.length === 3) {
-        return `${partes[2]}/${partes[1]}/${partes[0]}`;
-    }
-    return fechaStr;
+    const [anio, mes, dia] = fechaStr.split('-');
+    return `${dia}/${mes}/${anio}`;
+}
+
+function formatearFechaWhatsApp(fechaStr) {
+    if (!fechaStr) return '';
+    const [anio, mes, dia] = fechaStr.split('-');
+    return `${dia}/${mes}/${anio}`;
 }
 
 function esFinde(fecha) {
     const dia = fecha.getDay();
-    return dia === 0 || dia === 6; // 0 = Domingo, 6 = Sábado
+    return dia === 0 || dia === 6;
 }
 
 function diaEstaBloqueado(fechaStr) {
     return diasBloqueados.some(d => d.fecha === fechaStr);
 }
 
+// Optimización para rendimiento en móviles
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
 // ========== FUNCIONES DE NAVEGACIÓN ==========
 function nextStep(step) {
-    console.log('Next step llamado:', step);
-    
-    if (step === 2) {
-        // Validar paso 1
-        const nombre = document.getElementById('nombre')?.value;
-        const apellido = document.getElementById('apellido')?.value;
-        const imagen = document.getElementById('imagen')?.files[0];
-        
-        if (!nombre || !apellido || !imagen) {
-            alert('Completá todos tus datos primero 💅');
-            return;
-        }
+    if (step === 2 && !validarPaso1()) {
+        mostrarNotificacion('Completá todos tus datos primero 💅', 'info');
+        return;
     }
     
     if (step === 3 && !fechaSeleccionada) {
-        alert('Seleccioná una fecha 📅');
+        mostrarNotificacion('Seleccioná una fecha 📅', 'info');
         return;
     }
     
@@ -99,9 +110,6 @@ function nextStep(step) {
     const stepElement = document.getElementById(`step${step}`);
     if (stepElement) {
         stepElement.classList.add('active');
-    } else {
-        console.error(`No se encontró step${step}`);
-        return;
     }
     
     // Actualizar progress bar
@@ -124,12 +132,11 @@ function nextStep(step) {
         actualizarResumen();
     }
     
-    console.log('Paso actual:', step);
+    // Scroll suave al inicio del paso (importante en móvil)
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function prevStep(step) {
-    console.log('Prev step llamado:', step);
-    
     document.querySelectorAll('.step-content').forEach(el => {
         el.classList.remove('active');
     });
@@ -153,11 +160,12 @@ function prevStep(step) {
     }
     
     currentStep = step;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function validarPaso1() {
-    const nombre = document.getElementById('nombre')?.value || '';
-    const apellido = document.getElementById('apellido')?.value || '';
+    const nombre = document.getElementById('nombre')?.value?.trim() || '';
+    const apellido = document.getElementById('apellido')?.value?.trim() || '';
     const imagen = document.getElementById('imagen')?.files[0];
     
     const btnToStep3 = document.getElementById('btn-to-step3');
@@ -165,9 +173,11 @@ function validarPaso1() {
     if (btnToStep3) {
         if (nombre && apellido && imagen) {
             btnToStep3.disabled = false;
+            btnToStep3.classList.add('pulse');
             return true;
         } else {
             btnToStep3.disabled = true;
+            btnToStep3.classList.remove('pulse');
             return false;
         }
     }
@@ -181,8 +191,6 @@ function cambiarMes(delta) {
 }
 
 function renderizarCalendario() {
-    console.log('Renderizando calendario...');
-    
     const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
     const monthElement = document.getElementById('current-month');
     if (monthElement) {
@@ -194,78 +202,55 @@ function renderizarCalendario() {
     
     // Obtener fecha de HOY
     const hoy = new Date();
-    const hoyStr = formatearFecha(hoy);
-    const hoyObj = new Date(hoyStr + 'T12:00:00-03:00');
+    hoy.setHours(0, 0, 0, 0);
     
-    let dias = [];
+    let html = '';
     
-    // Días del mes anterior (para alinear el calendario)
+    // Días del mes anterior (para alinear)
     const diaSemanaPrimero = primerDia.getDay();
     const diasAntes = diaSemanaPrimero === 0 ? 6 : diaSemanaPrimero - 1;
     for (let i = 0; i < diasAntes; i++) {
-        dias.push({ tipo: 'empty' });
+        html += '<div class="calendar-day empty"></div>';
     }
     
     // Días del mes actual
     for (let i = 1; i <= ultimoDia.getDate(); i++) {
         const fecha = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), i);
+        fecha.setHours(0, 0, 0, 0);
         const fechaStr = formatearFecha(fecha);
         
-        const fechaObj = new Date(fechaStr + 'T12:00:00-03:00');
-        const esFechaPasada = fechaObj < hoyObj;
+        const esFechaPasada = fecha < hoy;
         const esFindeSemana = esFinde(fecha);
         const esBloqueado = diaEstaBloqueado(fechaStr);
         const turnosEnFecha = turnosCargados.filter(t => t.fecha === fechaStr);
         
-        let tipoClase = 'calendar-day';
+        let clase = 'calendar-day';
         
         if (esFindeSemana) {
-            tipoClase += ' weekend';
-        }
-        else if (esFechaPasada) {
-            tipoClase += ' pasado';
-        }
-        else if (esBloqueado) {
-            tipoClase += ' unavailable';
-        }
-        else if (turnosEnFecha.length >= horariosDisponibles.length) {
-            tipoClase += ' ocupado';
-        }
-        else {
-            tipoClase += ' available';
+            clase += ' weekend';
+        } else if (esFechaPasada) {
+            clase += ' pasado';
+        } else if (esBloqueado) {
+            clase += ' unavailable';
+        } else if (turnosEnFecha.length >= horariosDisponibles.length) {
+            clase += ' ocupado';
+        } else {
+            clase += ' available';
         }
         
         const seleccionable = !esFindeSemana && !esFechaPasada && !esBloqueado && turnosEnFecha.length < horariosDisponibles.length;
+        const onclickAttr = seleccionable ? `onclick="window.seleccionarDia('${fechaStr}')"` : '';
         
-        dias.push({
-            tipo: 'dia',
-            fecha: fecha,
-            fechaStr: fechaStr,
-            clase: tipoClase,
-            disponible: seleccionable
-        });
+        html += `<div class="${clase}" data-fecha="${fechaStr}" ${onclickAttr}>${i}</div>`;
     }
     
     const calendarElement = document.getElementById('calendar-days');
     if (calendarElement) {
-        let html = '';
-        dias.forEach(dia => {
-            if (dia.tipo === 'empty') {
-                html += '<div class="calendar-day empty"></div>';
-            } else {
-                const onclickAttr = dia.disponible ? `onclick="window.seleccionarDia('${dia.fechaStr}')"` : '';
-                html += `<div class="${dia.clase}" data-fecha="${dia.fechaStr}" ${onclickAttr}>${dia.fecha.getDate()}</div>`;
-            }
-        });
         calendarElement.innerHTML = html;
-        console.log(`Calendario renderizado con ${dias.length} celdas`);
-    } else {
-        console.error('No se encontró el elemento calendar-days');
     }
 }
 
 function seleccionarDia(fechaStr) {
-    console.log('Día seleccionado:', fechaStr);
     if (!fechaStr) return;
     
     document.querySelectorAll('.calendar-day.selected').forEach(el => {
@@ -289,6 +274,7 @@ function seleccionarDia(fechaStr) {
     const btnToStep3 = document.getElementById('btn-to-step3');
     if (btnToStep3) {
         btnToStep3.disabled = false;
+        btnToStep3.classList.add('pulse');
     }
 }
 
@@ -310,8 +296,6 @@ function mostrarHorariosDisponibles(fechaStr) {
 }
 
 function seleccionarHora(hora) {
-    console.log('Hora seleccionada:', hora);
-    
     document.querySelectorAll('.horario-item').forEach(el => {
         el.classList.remove('selected');
     });
@@ -360,12 +344,20 @@ function actualizarResumen() {
         `;
     }
     
-    resumenContainer.innerHTML = html || '<p>Completá los datos para ver el resumen</p>';
+    resumenContainer.innerHTML = html || '<p class="text-muted">Completá los datos para ver el resumen</p>';
 }
 
+// ========== SUBIDA DE IMAGEN ==========
 function previewImagen(event) {
     const file = event.target.files[0];
     if (file) {
+        // Validar tamaño (máx 5MB para móvil)
+        if (file.size > 5 * 1024 * 1024) {
+            mostrarNotificacion('La imagen es muy grande (máx 5MB)', 'error');
+            event.target.value = '';
+            return;
+        }
+        
         archivoImagen = file;
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -376,104 +368,163 @@ function previewImagen(event) {
             }
         };
         reader.readAsDataURL(file);
+        validarPaso1();
     }
 }
 
-async function reservarTurno() {
-    const nombre = document.getElementById('nombre')?.value;
-    const apellido = document.getElementById('apellido')?.value;
-    
-    if (!nombre || !apellido || !archivoImagen || !fechaSeleccionada || !horaSeleccionada) {
-        alert('Completá todos los campos 💅');
-        return;
-    }
-    
-    const btnReservar = document.getElementById('reservar-btn');
-    if (btnReservar) {
-        btnReservar.disabled = true;
-        btnReservar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reservando...';
-    }
+async function subirImagen() {
+    if (!archivoImagen) return null;
     
     try {
-        // Subir imagen a Storage
         const fileExt = archivoImagen.name.split('.').pop();
         const fileName = `${Date.now()}.${fileExt}`;
+        
         const { error: uploadError } = await supabaseClient.storage
             .from('imagenes-uvas')
-            .upload(fileName, archivoImagen);
+            .upload(fileName, archivoImagen, {
+                cacheControl: '3600',
+                upsert: false
+            });
         
         if (uploadError) throw uploadError;
         
-        // Obtener URL pública
         const { data: { publicUrl } } = supabaseClient.storage
             .from('imagenes-uvas')
             .getPublicUrl(fileName);
         
-        // Guardar turno
-        const { error } = await supabaseClient
-            .from('turnos')
-            .insert([
-                {
-                    nombre: nombre,
-                    apellido: apellido,
-                    fecha: fechaSeleccionada,
-                    hora: horaSeleccionada,
-                    imagen_url: publicUrl
-                }
-            ]);
-        
-        if (error) throw error;
-        
-        // Mostrar modal de éxito
-        const modal = document.getElementById('success-modal');
-        const modalDetalle = document.querySelector('.modal-detalle');
-        if (modal && modalDetalle) {
-            modalDetalle.innerHTML = `
-                ${nombre} ${apellido}<br>
-                ${formatearFechaLegible(fechaSeleccionada)} - ${horaSeleccionada} hs
-            `;
-            modal.style.display = 'flex';
-        }
-        
-        setTimeout(() => {
-            location.reload();
-        }, 3000);
+        return publicUrl;
         
     } catch (error) {
-        alert('Error al reservar: ' + error.message);
-        if (btnReservar) {
-            btnReservar.disabled = false;
-            btnReservar.innerHTML = '<i class="fas fa-calendar-check"></i> Confirmar reserva';
-        }
+        console.error('Error subiendo imagen:', error);
+        throw error;
     }
 }
 
-function closeModal() {
-    const modal = document.getElementById('success-modal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-    location.reload();
-}
-
-// ========== PÁGINA ADMIN ==========
-function initAdminPage() {
-    console.log('Inicializando panel admin...');
+// ========== RESERVA CON WHATSAPP ==========
+async function reservarTurno() {
+    const nombre = document.getElementById('nombre')?.value?.trim();
+    const apellido = document.getElementById('apellido')?.value?.trim();
     
+    if (!nombre || !apellido || !archivoImagen || !fechaSeleccionada || !horaSeleccionada) {
+        mostrarNotificacion('Completá todos los campos 💅', 'error');
+        return;
+    }
+    
+    const btnReservar = document.getElementById('reservar-btn');
+    const textoOriginal = btnReservar.innerHTML;
+    btnReservar.disabled = true;
+    btnReservar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+    
+    try {
+        // Subir imagen primero
+        mostrarNotificacion('Subiendo imagen...', 'info');
+        const imagenUrl = await subirImagen();
+        
+        if (!imagenUrl) throw new Error('No se pudo subir la imagen');
+        
+        // Guardar en Supabase
+        const { error: dbError } = await supabaseClient
+            .from('turnos')
+            .insert([{
+                nombre: nombre,
+                apellido: apellido,
+                fecha: fechaSeleccionada,
+                hora: horaSeleccionada,
+                imagen_url: imagenUrl
+            }]);
+        
+        if (dbError) throw dbError;
+        
+        // Formatear mensaje de WhatsApp
+        const fechaLegible = formatearFechaWhatsApp(fechaSeleccionada);
+        const mensaje = `Hola, me llamo ${nombre} ${apellido}, reservé un turno para el día ${fechaLegible} a las ${horaSeleccionada}.`;
+        
+        // Codificar mensaje para URL
+        const mensajeCodificado = encodeURIComponent(mensaje);
+        
+        // Abrir WhatsApp
+        window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${mensajeCodificado}`, '_blank');
+        
+        // Mostrar éxito
+        mostrarNotificacion('¡Turno reservado! Redirigiendo a WhatsApp...', 'success');
+        
+        // Resetear después de 2 segundos
+        setTimeout(() => {
+            location.reload();
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarNotificacion('Error al reservar: ' + error.message, 'error');
+        btnReservar.disabled = false;
+        btnReservar.innerHTML = textoOriginal;
+    }
+}
+
+// ========== NOTIFICACIONES ==========
+function mostrarNotificacion(mensaje, tipo) {
+    const notificacion = document.createElement('div');
+    notificacion.className = `notificacion ${tipo}`;
+    notificacion.innerHTML = `
+        <i class="fas ${tipo === 'success' ? 'fa-check-circle' : tipo === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+        <span>${mensaje}</span>
+    `;
+    
+    document.body.appendChild(notificacion);
+    
+    // Mostrar con animación
+    setTimeout(() => notificacion.classList.add('show'), 10);
+    
+    // Ocultar después de 3 segundos
+    setTimeout(() => {
+        notificacion.classList.remove('show');
+        setTimeout(() => notificacion.remove(), 300);
+    }, 3000);
+}
+
+// ========== INICIALIZACIÓN ==========
+function initClientePage() {
+    // Cargar datos
     Promise.all([
         cargarTurnos(),
         cargarHorarios(),
         cargarDiasBloqueados()
     ]).then(() => {
-        console.log('Datos cargados correctamente');
+        renderizarCalendario();
+    }).catch(error => {
+        console.error('Error cargando datos:', error);
+        renderizarCalendario();
+    });
+    
+    // Event listeners con debounce para rendimiento
+    const prevBtn = document.getElementById('prev-month');
+    const nextBtn = document.getElementById('next-month');
+    const imagenInput = document.getElementById('imagen');
+    const reservarBtn = document.getElementById('reservar-btn');
+    const nombreInput = document.getElementById('nombre');
+    const apellidoInput = document.getElementById('apellido');
+    
+    if (prevBtn) prevBtn.addEventListener('click', () => cambiarMes(-1));
+    if (nextBtn) nextBtn.addEventListener('click', () => cambiarMes(1));
+    if (imagenInput) imagenInput.addEventListener('change', previewImagen);
+    if (reservarBtn) reservarBtn.addEventListener('click', reservarTurno);
+    if (nombreInput) nombreInput.addEventListener('input', debounce(validarPaso1, 300));
+    if (apellidoInput) apellidoInput.addEventListener('input', debounce(validarPaso1, 300));
+}
+
+function initAdminPage() {
+    Promise.all([
+        cargarTurnos(),
+        cargarHorarios(),
+        cargarDiasBloqueados()
+    ]).then(() => {
         mostrarTurnos();
         actualizarStats();
         mostrarHorariosAdmin();
         mostrarDiasBloqueados();
-    }).catch(error => {
-        console.error('Error cargando datos:', error);
     });
     
+    // Filtros
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -483,8 +534,10 @@ function initAdminPage() {
     });
 }
 
+// ========== FUNCIONES ADMIN ==========
 function actualizarStats() {
     const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
     const hoyStr = formatearFecha(hoy);
     
     const turnosHoy = turnosCargados.filter(t => t.fecha === hoyStr).length;
@@ -510,6 +563,7 @@ function actualizarStats() {
 
 function filtrarTurnos(filtro) {
     const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
     const hoyStr = formatearFecha(hoy);
     
     let turnosFiltrados = turnosCargados;
@@ -571,13 +625,8 @@ function mostrarTurnos(turnos = turnosCargados) {
                     <p><i class="fas fa-calendar"></i> ${formatearFechaLegible(t.fecha)}</p>
                     <p><i class="fas fa-clock"></i> ${t.hora} hs</p>
                 </div>
-                <img src="${t.imagen_url}" alt="Diseño de uñas" class="turno-imagen" onclick="window.open(this.src)">
+                <img src="${t.imagen_url}" alt="Diseño de uñas" class="turno-imagen" onclick="window.open(this.src)" loading="lazy">
                 <div class="turno-actions">
-                    <a href="https://wa.me/5491123456789?text=Hola%20${t.nombre}!%20Te%20recuerdo%20tu%20turno%20el%20${formatearFechaLegible(t.fecha)}%20a%20las%20${t.hora}%20✨" 
-                       target="_blank" 
-                       class="btn-whatsapp">
-                        <i class="fab fa-whatsapp"></i> Recordar
-                    </a>
                     <button onclick="eliminarTurno(${t.id})" class="btn-eliminar">
                         <i class="fas fa-trash"></i> Eliminar
                     </button>
@@ -597,7 +646,7 @@ async function eliminarTurno(id) {
             .eq('id', id);
         
         if (!error) {
-            showNotification('Turno eliminado correctamente', 'success');
+            mostrarNotificacion('Turno eliminado', 'success');
             setTimeout(() => location.reload(), 1000);
         }
     }
@@ -630,7 +679,7 @@ async function agregarHorario() {
     
     const hora = horaInput.value;
     if (!hora) {
-        showNotification('Seleccioná un horario', 'error');
+        mostrarNotificacion('Seleccioná un horario', 'error');
         return;
     }
     
@@ -639,10 +688,10 @@ async function agregarHorario() {
         .insert([{ hora: hora, activo: true }]);
     
     if (!error) {
-        showNotification('Horario agregado correctamente', 'success');
+        mostrarNotificacion('Horario agregado', 'success');
         setTimeout(() => location.reload(), 1000);
     } else {
-        showNotification('Error: ' + error.message, 'error');
+        mostrarNotificacion('Error: ' + error.message, 'error');
     }
 }
 
@@ -654,7 +703,7 @@ async function eliminarHorario(id) {
             .eq('id', id);
         
         if (!error) {
-            showNotification('Horario eliminado', 'success');
+            mostrarNotificacion('Horario eliminado', 'success');
             setTimeout(() => location.reload(), 1000);
         }
     }
@@ -694,7 +743,7 @@ async function bloquearDia() {
     const motivo = motivoInput ? motivoInput.value : '';
     
     if (!fecha) {
-        showNotification('Seleccioná una fecha', 'error');
+        mostrarNotificacion('Seleccioná una fecha', 'error');
         return;
     }
     
@@ -703,7 +752,7 @@ async function bloquearDia() {
         .insert([{ fecha: fecha, motivo: motivo }]);
     
     if (!error) {
-        showNotification('Día bloqueado correctamente', 'success');
+        mostrarNotificacion('Día bloqueado', 'success');
         setTimeout(() => location.reload(), 1000);
     }
 }
@@ -715,91 +764,9 @@ async function desbloquearDia(id) {
         .eq('id', id);
     
     if (!error) {
-        showNotification('Día desbloqueado', 'success');
+        mostrarNotificacion('Día desbloqueado', 'success');
         setTimeout(() => location.reload(), 1000);
     }
-}
-
-function showNotification(mensaje, tipo) {
-    const notification = document.createElement('div');
-    notification.innerHTML = `
-        <i class="fas ${tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
-        <span>${mensaje}</span>
-    `;
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 25px;
-        background: ${tipo === 'success' ? '#51cf66' : '#ff6b6b'};
-        color: white;
-        border-radius: 10px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        z-index: 9999;
-        animation: slideInRight 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    `;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
-}
-
-// ========== INICIALIZACIÓN ==========
-function initClientePage() {
-    console.log('Inicializando página cliente...');
-    
-    // Verificar que los elementos existen
-    const step1 = document.getElementById('step1');
-    const step2 = document.getElementById('step2');
-    const step3 = document.getElementById('step3');
-    
-    console.log('Step1 existe:', !!step1);
-    console.log('Step2 existe:', !!step2);
-    console.log('Step3 existe:', !!step3);
-    
-    if (!step1 || !step2 || !step3) {
-        console.error('Faltan elementos step en el DOM');
-    }
-    
-    Promise.all([
-        cargarTurnos(),
-        cargarHorarios(),
-        cargarDiasBloqueados()
-    ]).then(() => {
-        console.log('Datos cargados:');
-        console.log('- Turnos:', turnosCargados.length);
-        console.log('- Horarios:', horariosDisponibles.length);
-        console.log('- Bloqueos:', diasBloqueados.length);
-        
-        renderizarCalendario();
-    }).catch(error => {
-        console.error('Error cargando datos:', error);
-        // Aún así renderizar calendario con datos vacíos
-        renderizarCalendario();
-    });
-    
-    // Event listeners
-    const prevBtn = document.getElementById('prev-month');
-    const nextBtn = document.getElementById('next-month');
-    const imagenInput = document.getElementById('imagen');
-    const reservarBtn = document.getElementById('reservar-btn');
-    const nombreInput = document.getElementById('nombre');
-    const apellidoInput = document.getElementById('apellido');
-    
-    if (prevBtn) prevBtn.addEventListener('click', () => cambiarMes(-1));
-    if (nextBtn) nextBtn.addEventListener('click', () => cambiarMes(1));
-    if (imagenInput) imagenInput.addEventListener('change', previewImagen);
-    if (reservarBtn) reservarBtn.addEventListener('click', reservarTurno);
-    if (nombreInput) nombreInput.addEventListener('input', validarPaso1);
-    if (apellidoInput) apellidoInput.addEventListener('input', validarPaso1);
-    if (imagenInput) imagenInput.addEventListener('change', validarPaso1);
-    
-    console.log('initClientePage completado');
 }
 
 // Hacer funciones globales
@@ -813,7 +780,5 @@ window.eliminarHorario = eliminarHorario;
 window.bloquearDia = bloquearDia;
 window.desbloquearDia = desbloquearDia;
 window.eliminarTurno = eliminarTurno;
-window.closeModal = closeModal;
 window.initClientePage = initClientePage;
 window.initAdminPage = initAdminPage;
-
