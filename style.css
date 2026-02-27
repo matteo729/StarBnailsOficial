@@ -1,16 +1,22 @@
 /* ========== VARIABLES Y RESET ========== */
 :root {
-    --rosa-claro: #fff0f5;
-    --rosa-suave: #ffe4ec;
-    --rosa-medio: #ffb6c1;
-    --rosa-oscuro: #db7090;
-    --lila: #e6e6fa;
-    --blanco: #ffffff;
-    --gris-claro: #f8f9fa;
-    --gris-texto: #4a4a4a;
-    --gris-suave: #a0a0a0;
-    --sombra: 0 2px 10px rgba(219, 112, 147, 0.1);
-    --sombra-hover: 0 4px 15px rgba(219, 112, 147, 0.15);
+    --primary: #d45e7a;
+    --primary-light: #f8e1e8;
+    --primary-dark: #b04a62;
+    --secondary: #c0a1b5;
+    --accent: #e8b4b8;
+    --background: #faf6f8;
+    --surface: #ffffff;
+    --text: #2d2d2d;
+    --text-light: #6b6b6b;
+    --text-lighter: #9b9b9b;
+    --border: #e8e0e3;
+    --error: #d45e5e;
+    --success: #7eb09e;
+    --shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+    --shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.06);
+    --radius: 16px;
+    --radius-sm: 8px;
 }
 
 * {
@@ -21,48 +27,101 @@
 }
 
 body {
-    background-color: var(--rosa-claro);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    color: var(--gris-texto);
-    line-height: 1.5;
+    background-color: var(--background);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--text);
+    line-height: 1.6;
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
 }
+
+/* Importar fuente Inter */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 
 .container {
     max-width: 1000px;
     margin: 0 auto;
-    padding: 16px;
+    padding: 24px;
 }
 
-/* ========== HEADER SIMPLE ========== */
-header {
-    text-align: center;
-    margin-bottom: 24px;
-}
-
-.logo h1 {
-    font-size: 2.2rem;
+/* ========== TIPOGRAFÍA PROFESIONAL ========== */
+h1, h2, h3, h4 {
     font-weight: 400;
-    color: var(--rosa-oscuro);
-    margin-bottom: 4px;
-    letter-spacing: 1px;
+    letter-spacing: -0.02em;
 }
 
-.subtitulo {
-    color: var(--gris-suave);
-    font-size: 1rem;
+h1 {
+    font-size: 2.2rem;
     font-weight: 300;
 }
 
-/* ========== PROGRESS BAR SIMPLE ========== */
+h2 {
+    font-size: 1.6rem;
+    font-weight: 300;
+    color: var(--primary-dark);
+}
+
+h3 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text);
+}
+
+p {
+    color: var(--text-light);
+    font-weight: 300;
+    font-size: 0.95rem;
+}
+
+/* ========== HEADER ELEGANTE ========== */
+header {
+    text-align: center;
+    margin-bottom: 32px;
+    padding: 8px 0;
+}
+
+.logo {
+    position: relative;
+    display: inline-block;
+}
+
+.logo h1 {
+    font-size: 2.4rem;
+    font-weight: 300;
+    color: var(--primary-dark);
+    margin-bottom: 4px;
+    letter-spacing: -0.5px;
+}
+
+.logo-dot {
+    position: absolute;
+    bottom: 8px;
+    right: -8px;
+    width: 6px;
+    height: 6px;
+    background: var(--primary);
+    border-radius: 50%;
+    opacity: 0.6;
+}
+
+.subtitulo {
+    color: var(--text-lighter);
+    font-size: 0.9rem;
+    font-weight: 300;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* ========== PROGRESS BAR PROFESIONAL ========== */
 .progress-bar {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 24px;
-    background: var(--blanco);
-    padding: 12px;
+    margin-bottom: 32px;
+    background: var(--surface);
+    padding: 16px 24px;
     border-radius: 40px;
-    box-shadow: var(--sombra);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
 }
 
 .progress-step {
@@ -74,65 +133,78 @@ header {
 .step-number {
     width: 32px;
     height: 32px;
-    background: var(--rosa-suave);
+    background: var(--background);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 4px;
-    color: var(--rosa-oscuro);
-    font-size: 0.9rem;
-    font-weight: 500;
+    margin: 0 auto 8px;
+    color: var(--text-lighter);
+    font-size: 0.85rem;
+    font-weight: 400;
+    border: 1px solid var(--border);
+    transition: all 0.2s ease;
 }
 
 .progress-step.active .step-number {
-    background: var(--rosa-oscuro);
-    color: var(--blanco);
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
 }
 
 .progress-step span {
-    font-size: 0.8rem;
-    color: var(--gris-suave);
+    font-size: 0.85rem;
+    color: var(--text-lighter);
+    font-weight: 300;
+    letter-spacing: 0.3px;
 }
 
 .progress-step.active span {
-    color: var(--rosa-oscuro);
-    font-weight: 500;
+    color: var(--primary-dark);
+    font-weight: 400;
 }
 
-/* ========== CARDS SIMPLES ========== */
+/* ========== CARDS ELEGANTES ========== */
 .card {
-    background: var(--blanco);
-    border-radius: 24px;
-    padding: 24px;
-    margin-bottom: 16px;
-    box-shadow: var(--sombra);
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 32px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-hover);
 }
 
 .card-header {
-    margin-bottom: 20px;
+    margin-bottom: 28px;
 }
 
 .card-header h2 {
-    font-size: 1.3rem;
-    font-weight: 400;
-    color: var(--rosa-oscuro);
-    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
 }
 
 .card-header h2 i {
-    margin-right: 8px;
-    color: var(--rosa-medio);
+    color: var(--primary);
+    font-size: 1.4rem;
+    opacity: 0.7;
 }
 
 .card-header p {
-    color: var(--gris-suave);
+    color: var(--text-lighter);
     font-size: 0.9rem;
+    margin-left: 32px;
 }
 
-/* ========== FORMULARIOS SIMPLES ========== */
+/* ========== FORMULARIOS PROFESIONALES ========== */
 .form-group {
-    margin-bottom: 16px;
+    margin-bottom: 20px;
 }
 
 .floating {
@@ -141,71 +213,84 @@ header {
 
 .floating input {
     width: 100%;
-    padding: 14px 16px 14px 40px;
-    border: 1px solid var(--rosa-suave);
-    border-radius: 16px;
-    font-size: 16px;
-    background: var(--blanco);
+    padding: 16px 16px 16px 44px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+    font-family: 'Inter', sans-serif;
+    background: var(--surface);
+    transition: border-color 0.2s ease;
 }
 
 .floating input:focus {
     outline: none;
-    border-color: var(--rosa-medio);
+    border-color: var(--primary);
 }
 
 .floating label {
     position: absolute;
-    left: 40px;
-    top: 14px;
-    color: var(--gris-suave);
-    font-size: 0.95rem;
-    transition: none;
+    left: 44px;
+    top: 16px;
+    color: var(--text-lighter);
+    font-size: 0.9rem;
+    font-weight: 300;
+    pointer-events: none;
+    transition: all 0.2s ease;
 }
 
 .floating input:focus + label,
 .floating input:not(:placeholder-shown) + label {
-    display: none;
+    opacity: 0;
+    visibility: hidden;
 }
 
 .input-icon {
     position: absolute;
-    left: 14px;
-    top: 14px;
-    color: var(--rosa-medio);
+    left: 16px;
+    top: 16px;
+    color: var(--primary);
     font-size: 1rem;
+    opacity: 0.6;
 }
 
-/* ========== FILE UPLOAD SIMPLE ========== */
+/* ========== FILE UPLOAD PROFESIONAL ========== */
 .file-upload {
     margin-top: 8px;
 }
 
 .file-label {
-    display: block;
-    padding: 16px;
-    background: var(--rosa-claro);
-    border: 1px dashed var(--rosa-medio);
-    border-radius: 16px;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 20px;
+    background: var(--background);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-sm);
     cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.file-label:hover {
+    border-color: var(--primary);
 }
 
 .file-label i {
-    font-size: 1.5rem;
-    color: var(--rosa-medio);
-    margin-bottom: 4px;
+    font-size: 2rem;
+    color: var(--primary);
+    opacity: 0.5;
+    margin-bottom: 12px;
 }
 
 .file-label span {
-    display: block;
-    color: var(--rosa-oscuro);
     font-size: 0.95rem;
-    margin-bottom: 2px;
+    color: var(--text);
+    margin-bottom: 4px;
 }
 
 .file-label small {
-    color: var(--gris-suave);
     font-size: 0.8rem;
+    color: var(--text-lighter);
 }
 
 .file-upload input {
@@ -213,48 +298,55 @@ header {
 }
 
 .preview-container {
-    margin-top: 12px;
+    margin-top: 16px;
     text-align: center;
 }
 
 .preview-container img {
     max-width: 200px;
     max-height: 200px;
-    border-radius: 12px;
-    border: 2px solid var(--rosa-suave);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    padding: 4px;
 }
 
-/* ========== CALENDARIO SIMPLE ========== */
+/* ========== CALENDARIO PROFESIONAL ========== */
 .calendar-wrapper {
-    background: var(--rosa-claro);
-    border-radius: 20px;
-    padding: 16px;
-    margin: 16px 0;
+    background: var(--background);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    margin: 20px 0;
 }
 
 .calendar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 24px;
 }
 
 .btn-circle {
     width: 40px;
     height: 40px;
-    border: none;
-    background: var(--blanco);
+    border: 1px solid var(--border);
+    background: var(--surface);
     border-radius: 50%;
-    color: var(--rosa-oscuro);
+    color: var(--primary);
     cursor: pointer;
-    font-size: 1rem;
-    box-shadow: var(--sombra);
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.btn-circle:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
 }
 
 .month-title {
     font-size: 1.1rem;
     font-weight: 400;
-    color: var(--rosa-oscuro);
+    color: var(--text);
 }
 
 .calendar-weekdays {
@@ -262,9 +354,11 @@ header {
     grid-template-columns: repeat(7, 1fr);
     text-align: center;
     font-size: 0.8rem;
-    color: var(--rosa-oscuro);
-    margin-bottom: 8px;
-    font-weight: 500;
+    color: var(--text-lighter);
+    margin-bottom: 12px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .calendar-days {
@@ -278,200 +372,255 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--blanco);
-    border-radius: 8px;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
     font-size: 0.9rem;
+    font-weight: 300;
     cursor: pointer;
     border: 1px solid transparent;
+    transition: all 0.2s ease;
 }
 
 .calendar-day.available:hover {
-    background: var(--rosa-suave);
+    background: var(--primary-light);
+    border-color: var(--primary);
 }
 
 .calendar-day.selected {
-    background: var(--rosa-oscuro);
-    color: var(--blanco);
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
 }
 
 .calendar-day.ocupado {
     background: #f8f8f8;
     color: #ccc;
-    text-decoration: line-through;
     cursor: not-allowed;
+    border-color: #f0f0f0;
 }
 
 .calendar-day.weekend {
     background: #f8f8f8;
     color: #ccc;
     cursor: not-allowed;
+    border-color: #f0f0f0;
 }
 
 .calendar-day.pasado {
     background: #f8f8f8;
     color: #ccc;
     cursor: not-allowed;
+    border-color: #f0f0f0;
+    text-decoration: line-through;
+    opacity: 0.7;
 }
 
 .calendar-day.empty {
     background: transparent;
+    cursor: default;
 }
 
-/* ========== LEYENDA SIMPLE ========== */
+/* ========== LEYENDA PROFESIONAL ========== */
 .legend {
     display: flex;
-    gap: 16px;
-    margin: 16px 0;
+    gap: 24px;
+    margin: 20px 0;
     flex-wrap: wrap;
+    padding: 8px 0;
 }
 
 .legend-item {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     font-size: 0.8rem;
-    color: var(--gris-suave);
+    color: var(--text-lighter);
+    font-weight: 300;
 }
 
 .dot {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
 }
 
 .dot.available {
-    background: var(--blanco);
-    border: 1px solid var(--rosa-oscuro);
+    background: var(--surface);
+    border: 1px solid var(--primary);
 }
 
 .dot.ocupado {
     background: #f0f0f0;
+    border: 1px solid #ddd;
 }
 
 .dot.weekend {
     background: #f0f0f0;
+    border: 1px solid #ddd;
 }
 
 .dot.pasado {
     background: #f0f0f0;
+    border: 1px solid #ddd;
 }
 
-/* ========== HORARIOS SIMPLE ========== */
+/* ========== HORARIOS PROFESIONALES ========== */
 .horarios-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-    gap: 8px;
-    margin: 16px 0;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 10px;
+    margin: 24px 0;
 }
 
 .horario-item {
-    padding: 10px 4px;
+    padding: 12px 4px;
     text-align: center;
-    background: var(--rosa-claro);
-    border-radius: 12px;
+    background: var(--background);
+    border-radius: var(--radius-sm);
     font-size: 0.9rem;
-    color: var(--rosa-oscuro);
+    color: var(--text);
     cursor: pointer;
     border: 1px solid transparent;
+    transition: all 0.2s ease;
+    font-weight: 300;
 }
 
 .horario-item:hover {
-    background: var(--rosa-suave);
+    background: var(--primary-light);
+    border-color: var(--primary);
 }
 
 .horario-item.ocupado {
     background: #f8f8f8;
     color: #ccc;
     cursor: not-allowed;
+    border-color: #f0f0f0;
 }
 
 .horario-item.selected {
-    background: var(--rosa-oscuro);
-    color: var(--blanco);
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
 }
 
-/* ========== RESUMEN SIMPLE ========== */
+/* ========== RESUMEN PROFESIONAL ========== */
 .resumen-card {
-    background: var(--rosa-claro);
-    border-radius: 16px;
-    padding: 16px;
-    margin: 16px 0;
+    background: var(--background);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    margin: 24px 0;
+    border: 1px solid var(--border);
 }
 
 .resumen-card h3 {
-    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
     font-weight: 400;
-    color: var(--rosa-oscuro);
-    margin-bottom: 12px;
+    color: var(--text);
+}
+
+.resumen-card h3 i {
+    color: var(--primary);
+    opacity: 0.7;
 }
 
 .resumen-contenido {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 12px;
 }
 
 .resumen-item {
-    background: var(--blanco);
-    padding: 10px;
-    border-radius: 10px;
+    background: var(--surface);
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
 }
 
 .resumen-item strong {
     display: block;
-    font-size: 0.8rem;
-    color: var(--gris-suave);
+    font-size: 0.75rem;
+    color: var(--text-lighter);
     font-weight: 400;
-    margin-bottom: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
 }
 
 .resumen-item p {
     font-size: 0.95rem;
-    color: var(--gris-texto);
+    color: var(--text);
+    font-weight: 400;
 }
 
-/* ========== BOTONES SIMPLES ========== */
+.text-muted {
+    color: var(--text-lighter);
+    font-style: italic;
+    font-weight: 300;
+    text-align: center;
+    padding: 20px;
+}
+
+/* ========== BOTONES PROFESIONALES ========== */
 .btn-next, .btn-back, .btn-reservar {
-    padding: 14px 20px;
+    padding: 14px 24px;
     border: none;
     border-radius: 40px;
-    font-size: 1rem;
-    cursor: pointer;
+    font-size: 0.95rem;
     font-weight: 400;
+    cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
+    transition: all 0.2s ease;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 0.3px;
 }
 
 .btn-next, .btn-reservar {
-    background: var(--rosa-oscuro);
-    color: var(--blanco);
+    background: var(--primary);
+    color: white;
     width: 100%;
 }
 
+.btn-next:hover, .btn-reservar:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(212, 94, 122, 0.2);
+}
+
 .btn-next:disabled {
-    opacity: 0.5;
+    opacity: 0.3;
     cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
 }
 
 .btn-back {
-    background: var(--blanco);
-    color: var(--rosa-oscuro);
-    border: 1px solid var(--rosa-oscuro);
+    background: transparent;
+    color: var(--text-light);
+    border: 1px solid var(--border);
+}
+
+.btn-back:hover {
+    background: var(--background);
+    border-color: var(--text-lighter);
 }
 
 .navigation-buttons {
     display: flex;
     gap: 12px;
-    margin-top: 16px;
+    margin-top: 24px;
 }
 
 .navigation-buttons button {
     flex: 1;
 }
 
-/* ========== MODAL SIMPLE ========== */
+/* ========== MODAL PROFESIONAL ========== */
 .modal {
     display: none;
     position: fixed;
@@ -484,139 +633,138 @@ header {
     align-items: center;
     justify-content: center;
     padding: 16px;
+    backdrop-filter: blur(4px);
 }
 
 .modal-content {
-    background: var(--blanco);
-    padding: 32px 24px;
-    border-radius: 32px;
-    max-width: 340px;
+    background: var(--surface);
+    padding: 40px 32px;
+    border-radius: 24px;
+    max-width: 360px;
     width: 100%;
     text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--border);
 }
 
 .modal-icon {
     font-size: 2.5rem;
     margin-bottom: 16px;
+    opacity: 0.8;
 }
 
 .modal h2 {
-    font-size: 1.3rem;
-    font-weight: 400;
-    color: var(--rosa-oscuro);
+    font-size: 1.4rem;
     margin-bottom: 8px;
+    color: var(--primary-dark);
 }
 
 .modal p {
-    color: var(--gris-suave);
+    color: var(--text-lighter);
     font-size: 0.9rem;
-    margin-bottom: 8px;
 }
 
 .modal-detalle {
-    background: var(--rosa-claro);
-    padding: 12px;
-    border-radius: 12px;
-    margin: 16px 0;
+    background: var(--background);
+    padding: 16px;
+    border-radius: var(--radius-sm);
+    margin: 20px 0;
     font-size: 0.95rem;
-    color: var(--gris-texto);
+    color: var(--text);
+    border: 1px solid var(--border);
 }
 
 .btn-modal {
     width: 100%;
     padding: 14px;
-    background: var(--rosa-oscuro);
-    color: var(--blanco);
+    background: var(--primary);
+    color: white;
     border: none;
     border-radius: 40px;
-    font-size: 1rem;
+    font-size: 0.95rem;
+    font-weight: 400;
     cursor: pointer;
+    transition: background 0.2s ease;
 }
 
-/* ========== NOTIFICACIONES SIMPLES ========== */
+.btn-modal:hover {
+    background: var(--primary-dark);
+}
+
+/* ========== NOTIFICACIONES ELEGANTES ========== */
 .notificacion {
     position: fixed;
     top: 20px;
     right: 20px;
     padding: 12px 20px;
-    background: var(--blanco);
+    background: var(--surface);
     border-radius: 40px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     z-index: 9999;
     font-size: 0.9rem;
     max-width: 90%;
     transform: translateX(120%);
-    transition: transform 0.2s;
+    transition: transform 0.2s ease;
+    border: 1px solid var(--border);
 }
 
 .notificacion.show {
     transform: translateX(0);
 }
 
-.notificacion.success {
-    border-left: 4px solid #4caf50;
-}
-
-.notificacion.error {
-    border-left: 4px solid #f44336;
-}
-
-.notificacion.info {
-    border-left: 4px solid var(--rosa-oscuro);
-}
-
 .notificacion i {
-    font-size: 1.1rem;
+    font-size: 1rem;
 }
 
 .notificacion.success i {
-    color: #4caf50;
+    color: var(--success);
 }
 
 .notificacion.error i {
-    color: #f44336;
+    color: var(--error);
 }
 
 .notificacion.info i {
-    color: var(--rosa-oscuro);
+    color: var(--primary);
 }
 
-/* ========== ADMIN SIMPLE ========== */
+/* ========== ADMIN PROFESIONAL ========== */
 .admin-body {
-    background: var(--gris-claro);
+    background: var(--background);
 }
 
 .admin-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 16px;
+    padding: 24px;
 }
 
 .admin-header {
-    background: var(--blanco);
-    padding: 20px;
-    border-radius: 20px;
-    margin-bottom: 20px;
+    background: var(--surface);
+    padding: 24px 28px;
+    border-radius: var(--radius);
+    margin-bottom: 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
     gap: 16px;
-    box-shadow: var(--sombra);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
 }
 
-.admin-header-content h1 {
-    font-size: 1.5rem;
-    font-weight: 400;
-    color: var(--rosa-oscuro);
+.admin-header h1 {
+    font-size: 1.6rem;
+    font-weight: 300;
+    color: var(--primary-dark);
     margin-bottom: 4px;
 }
 
-.admin-header-content p {
-    color: var(--gris-suave);
+.admin-header p {
+    color: var(--text-lighter);
     font-size: 0.9rem;
 }
 
@@ -624,53 +772,70 @@ header {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 16px;
-    background: var(--rosa-claro);
-    color: var(--rosa-oscuro);
+    padding: 10px 18px;
+    background: var(--background);
+    color: var(--text-light);
     text-decoration: none;
     border-radius: 40px;
     font-size: 0.9rem;
+    border: 1px solid var(--border);
+    transition: all 0.2s ease;
+}
+
+.btn-home:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
 }
 
 /* Stats Cards */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
-    margin-bottom: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
 }
 
 .stat-card {
-    background: var(--blanco);
-    padding: 16px;
-    border-radius: 16px;
+    background: var(--surface);
+    padding: 20px;
+    border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
-    gap: 12px;
-    box-shadow: var(--sombra);
+    gap: 16px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
 }
 
 .stat-icon {
-    width: 44px;
-    height: 44px;
-    background: var(--rosa-claro);
+    width: 48px;
+    height: 48px;
+    background: var(--background);
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--rosa-oscuro);
-    font-size: 1.2rem;
-}
-
-.stat-info h3 {
+    color: var(--primary);
     font-size: 1.3rem;
-    font-weight: 400;
-    color: var(--rosa-oscuro);
 }
 
-.stat-info p {
+.stat-card h3 {
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: var(--primary-dark);
+    margin-bottom: 2px;
+}
+
+.stat-card p {
     font-size: 0.8rem;
-    color: var(--gris-suave);
+    color: var(--text-lighter);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 /* Admin Tabs */
@@ -678,25 +843,26 @@ header {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
-    margin-bottom: 20px;
-    background: var(--blanco);
-    padding: 12px;
+    margin-bottom: 24px;
+    background: var(--surface);
+    padding: 8px;
     border-radius: 40px;
-    box-shadow: var(--sombra);
+    border: 1px solid var(--border);
 }
 
 .tab-btn {
     padding: 12px;
     border: none;
     background: transparent;
-    border-radius: 30px;
+    border-radius: 32px;
     font-size: 0.95rem;
-    color: var(--gris-suave);
+    color: var(--text-lighter);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
+    transition: all 0.2s ease;
 }
 
 .tab-btn i {
@@ -704,8 +870,8 @@ header {
 }
 
 .tab-btn.active {
-    background: var(--rosa-oscuro);
-    color: var(--blanco);
+    background: var(--primary);
+    color: white;
 }
 
 @media (max-width: 480px) {
@@ -726,122 +892,157 @@ header {
 .turnos-filters {
     display: flex;
     gap: 8px;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
     flex-wrap: wrap;
 }
 
 .filter-btn {
     padding: 8px 16px;
-    border: 1px solid var(--rosa-suave);
-    background: var(--blanco);
+    border: 1px solid var(--border);
+    background: var(--surface);
     border-radius: 30px;
     font-size: 0.85rem;
-    color: var(--gris-texto);
+    color: var(--text-light);
     cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .filter-btn.active {
-    background: var(--rosa-oscuro);
-    color: var(--blanco);
-    border-color: var(--rosa-oscuro);
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
 }
 
 /* Turnos Grid */
 .turnos-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
 }
 
 .turno-card {
-    background: var(--blanco);
-    border-radius: 16px;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
     overflow: hidden;
-    box-shadow: var(--sombra);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    transition: transform 0.2s ease;
+}
+
+.turno-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
 }
 
 .turno-card-header {
-    background: var(--rosa-claro);
-    padding: 12px 16px;
+    background: var(--background);
+    padding: 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-bottom: 1px solid var(--border);
 }
 
 .turno-card-header h3 {
     font-size: 1rem;
     font-weight: 400;
-    color: var(--rosa-oscuro);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.turno-card-header h3 i {
+    color: var(--primary);
+    opacity: 0.7;
 }
 
 .turno-badge {
-    background: var(--blanco);
+    background: var(--surface);
     padding: 4px 8px;
     border-radius: 20px;
-    font-size: 0.75rem;
-    color: var(--rosa-oscuro);
+    font-size: 0.7rem;
+    color: var(--text-lighter);
+    border: 1px solid var(--border);
 }
 
 .turno-card-body {
-    padding: 16px;
+    padding: 20px;
 }
 
 .turno-info p {
-    margin: 6px 0;
+    margin: 8px 0;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     font-size: 0.9rem;
-    color: var(--gris-texto);
+    color: var(--text);
 }
 
 .turno-info i {
-    color: var(--rosa-medio);
+    color: var(--primary);
     width: 18px;
+    opacity: 0.7;
 }
 
 .turno-imagen {
     width: 100%;
     height: 180px;
     object-fit: cover;
-    border-radius: 12px;
-    margin: 12px 0;
+    border-radius: var(--radius-sm);
+    margin: 16px 0;
     cursor: pointer;
+    border: 1px solid var(--border);
 }
 
 .turno-actions {
-    margin-top: 12px;
+    margin-top: 16px;
 }
 
 .btn-eliminar {
     width: 100%;
     padding: 10px;
-    background: #fff2f0;
-    color: #d32f2f;
-    border: 1px solid #ffcdd2;
+    background: #fef0f0;
+    color: #d45e5e;
+    border: 1px solid #ffe1e1;
     border-radius: 30px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-eliminar:hover {
+    background: #d45e5e;
+    color: white;
+    border-color: #d45e5e;
 }
 
 /* Admin Cards */
 .admin-card {
-    background: var(--blanco);
-    border-radius: 20px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: var(--sombra);
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    padding: 24px;
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
 }
 
 .admin-card h3 {
     font-size: 1.1rem;
     font-weight: 400;
-    color: var(--rosa-oscuro);
-    margin-bottom: 16px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--primary-dark);
+}
+
+.admin-card h3 i {
+    color: var(--primary);
+    opacity: 0.7;
 }
 
 /* Input Groups */
@@ -852,22 +1053,27 @@ header {
 
 .input-group i {
     position: absolute;
-    left: 14px;
-    top: 14px;
-    color: var(--rosa-medio);
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--primary);
+    opacity: 0.5;
+    font-size: 0.9rem;
 }
 
 .input-group input {
     width: 100%;
-    padding: 12px 12px 12px 40px;
-    border: 1px solid var(--rosa-suave);
+    padding: 14px 14px 14px 42px;
+    border: 1px solid var(--border);
     border-radius: 30px;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+    font-family: 'Inter', sans-serif;
+    background: var(--surface);
 }
 
 .input-group input:focus {
     outline: none;
-    border-color: var(--rosa-medio);
+    border-color: var(--primary);
 }
 
 /* Add Horario/Bloqueo */
@@ -879,25 +1085,39 @@ header {
 }
 
 .btn-add, .btn-block {
-    padding: 12px 24px;
+    padding: 14px 28px;
     border: none;
     border-radius: 30px;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 6px;
-    min-width: 120px;
+    gap: 8px;
+    transition: all 0.2s ease;
 }
 
 .btn-add {
-    background: #e8f5e9;
-    color: #2e7d32;
+    background: #f0f7f3;
+    color: #7eb09e;
+    border: 1px solid #d9e8e0;
+}
+
+.btn-add:hover {
+    background: #7eb09e;
+    color: white;
+    border-color: #7eb09e;
 }
 
 .btn-block {
-    background: #fff2f0;
-    color: #d32f2f;
+    background: #fef0f0;
+    color: #d45e5e;
+    border: 1px solid #ffe1e1;
+}
+
+.btn-block:hover {
+    background: #d45e5e;
+    color: white;
+    border-color: #d45e5e;
 }
 
 @media (max-width: 600px) {
@@ -919,91 +1139,113 @@ header {
 }
 
 .horario-admin-item {
-    background: var(--rosa-claro);
-    padding: 12px 4px;
-    border-radius: 12px;
+    background: var(--background);
+    padding: 14px 4px;
+    border-radius: var(--radius-sm);
     text-align: center;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
+    border: 1px solid var(--border);
 }
 
 .horario-admin-item .hora {
     font-size: 1rem;
-    color: var(--rosa-oscuro);
+    color: var(--text);
+    font-weight: 400;
 }
 
 .horario-admin-item button {
     padding: 6px;
-    background: var(--blanco);
-    color: var(--gris-suave);
-    border: 1px solid var(--rosa-suave);
+    background: var(--surface);
+    color: var(--text-lighter);
+    border: 1px solid var(--border);
     border-radius: 20px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.horario-admin-item button:hover {
+    background: #fef0f0;
+    color: #d45e5e;
+    border-color: #ffe1e1;
 }
 
 /* Bloqueos Grid */
 .bloqueos-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 12px;
 }
 
 .bloqueo-item {
-    background: var(--blanco);
-    padding: 16px;
-    border-radius: 16px;
+    background: var(--surface);
+    padding: 18px;
+    border-radius: var(--radius-sm);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border: 1px solid var(--rosa-suave);
+    border: 1px solid var(--border);
     gap: 12px;
+    transition: border-color 0.2s ease;
+}
+
+.bloqueo-item:hover {
+    border-color: var(--primary);
 }
 
 .bloqueo-info strong {
     display: block;
     font-size: 0.95rem;
-    color: var(--gris-texto);
-    margin-bottom: 2px;
+    color: var(--text);
+    margin-bottom: 4px;
+    font-weight: 400;
 }
 
 .bloqueo-info small {
-    color: var(--gris-suave);
+    color: var(--text-lighter);
     font-size: 0.8rem;
 }
 
 .bloqueo-item button {
     padding: 8px 12px;
-    background: #e8f5e9;
-    color: #2e7d32;
-    border: none;
+    background: #f0f7f3;
+    color: #7eb09e;
+    border: 1px solid #d9e8e0;
     border-radius: 20px;
     font-size: 0.8rem;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 4px;
+    transition: all 0.2s ease;
+}
+
+.bloqueo-item button:hover {
+    background: #7eb09e;
+    color: white;
 }
 
 /* Empty State */
 .empty-state {
     text-align: center;
-    padding: 40px 20px;
-    background: var(--blanco);
-    border-radius: 20px;
+    padding: 48px 24px;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
 }
 
 .empty-state i {
     font-size: 2.5rem;
-    color: var(--rosa-medio);
-    margin-bottom: 12px;
-    opacity: 0.5;
+    color: var(--text-lighter);
+    margin-bottom: 16px;
+    opacity: 0.3;
 }
 
 .empty-state p {
-    color: var(--gris-suave);
-    font-size: 0.95rem;
+    color: var(--text-lighter);
+    font-size: 0.9rem;
 }
 
 /* ========== STEP CONTENT ========== */
@@ -1015,19 +1257,18 @@ header {
     display: block;
 }
 
-/* ========== UTILIDADES ========== */
-.text-muted {
-    color: var(--gris-suave);
-}
-
-/* ========== RESPONSIVE ========== */
+/* ========== RESPONSIVE PROFESIONAL ========== */
 @media (max-width: 768px) {
-    .container {
-        padding: 12px;
+    .container, .admin-container {
+        padding: 16px;
     }
     
     .card {
-        padding: 20px;
+        padding: 24px;
+    }
+    
+    .card-header p {
+        margin-left: 0;
     }
     
     .horarios-grid {
@@ -1038,11 +1279,6 @@ header {
         flex-direction: column;
     }
     
-    .admin-header {
-        flex-direction: column;
-        text-align: center;
-    }
-    
     .stats-grid {
         grid-template-columns: 1fr;
     }
@@ -1050,11 +1286,22 @@ header {
     .turnos-grid {
         grid-template-columns: 1fr;
     }
+    
+    .admin-header {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .btn-home {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 @media (max-width: 480px) {
     .logo h1 {
-        font-size: 1.8rem;
+        font-size: 2rem;
     }
     
     .horarios-grid {
@@ -1062,8 +1309,8 @@ header {
     }
     
     .legend {
-        gap: 12px;
-        font-size: 0.75rem;
+        gap: 16px;
+        justify-content: flex-start;
     }
     
     .step-number {
@@ -1071,19 +1318,58 @@ header {
         height: 28px;
         font-size: 0.8rem;
     }
+    
+    .progress-step span {
+        font-size: 0.7rem;
+    }
+    
+    .admin-tabs {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .bloqueos-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
-/* ========== IPHONE FIXES ========== */
+/* ========== IPHONE FIXES PROFESIONALES ========== */
 @supports (-webkit-touch-callout: none) {
     body, .container {
         min-height: -webkit-fill-available;
     }
     
-    input, button {
+    input, select, textarea, button {
         font-size: 16px !important;
     }
     
     button {
         -webkit-appearance: none;
     }
+    
+    /* Scroll suave */
+    body {
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Eliminar highlight */
+    * {
+        -webkit-tap-highlight-color: transparent;
+    }
+}
+
+/* ========== UTILIDADES ========== */
+.hidden {
+    display: none !important;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.mt-4 {
+    margin-top: 24px;
+}
+
+.mb-4 {
+    margin-bottom: 24px;
 }
