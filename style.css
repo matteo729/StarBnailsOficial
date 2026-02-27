@@ -1478,4 +1478,38 @@ header {
     font-size: 3rem;
     margin-bottom: 15px;
     color: #cbd5e1;
+
+}
+
+/* FUERZA QUE LOS NÚMEROS APAREZCAN */
+.calendar-day {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+    color: #333 !important;
+    background-color: #f8f9fa !important;
+    border: 1px solid #ddd !important;
+    min-height: 50px !important;
+}
+
+.calendar-day.empty {
+    background: transparent !important;
+    border: none !important;
+}
+
+.calendar-day span {
+    display: block !important;
+}
+
+/* Para depuración - borde rojo a todo el calendario */
+.calendar-days {
+    border: 2px solid red !important;
+    min-height: 200px !important;
+    display: grid !important;
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: 5px !important;
+    padding: 10px !important;
+    background-color: #fff !important;
 }
