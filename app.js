@@ -1,4 +1,4 @@
-// Configuración de Supabase - ACTUALIZADO CON TUS DATOS
+// Configuración de Supabase - CON TUS DATOS
 const SUPABASE_URL = 'https://linuhhqhtxrodrzuheeu.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpbnVoaHFodHhyb2RyenVoZWV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMTUyMjAsImV4cCI6MjA4Nzc5MTIyMH0.oPyRsa6ZcrhijDFT-FQKjvkPTYvW5sE8C_aEt-OQ0Vc';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -20,8 +20,8 @@ async function cargarTurnos() {
         .select('*')
         .order('fecha', { ascending: true });
     
-    if (!error) turnosCargados = data;
-    return data;
+    if (!error) turnosCargados = data || [];
+    return turnosCargados;
 }
 
 async function cargarHorarios() {
@@ -31,8 +31,8 @@ async function cargarHorarios() {
         .eq('activo', true)
         .order('hora');
     
-    if (!error) horariosDisponibles = data;
-    return data;
+    if (!error) horariosDisponibles = data || [];
+    return horariosDisponibles;
 }
 
 async function cargarDiasBloqueados() {
@@ -40,8 +40,8 @@ async function cargarDiasBloqueados() {
         .from('dias_bloqueados')
         .select('*');
     
-    if (!error) diasBloqueados = data;
-    return data;
+    if (!error) diasBloqueados = data || [];
+    return diasBloqueados;
 }
 
 function formatearFecha(fecha) {
@@ -52,55 +52,37 @@ function formatearFecha(fecha) {
 }
 
 function formatearFechaLegible(fechaStr) {
-    const [anio, mes, dia] = fechaStr.split('-');
-    return `${dia}/${mes}/${anio}`;
+    if (!fechaStr) return '';
+    const partes = fechaStr.split('-');
+    if (partes.length === 3) {
+        return `${partes[2]}/${partes[1]}/${partes[0]}`;
+    }
+    return fechaStr;
 }
 
 function esFinde(fecha) {
     const dia = fecha.getDay();
-    return dia === 0 || dia === 6;
+    return dia === 0 || dia === 6; // 0 = Domingo, 6 = Sábado
 }
 
 function diaEstaBloqueado(fechaStr) {
     return diasBloqueados.some(d => d.fecha === fechaStr);
 }
 
-// ========== PÁGINA CLIENTE ==========
-function initClientePage() {
-    console.log('Inicializando página cliente...');
-    
-    Promise.all([
-        cargarTurnos(),
-        cargarHorarios(),
-        cargarDiasBloqueados()
-    ]).then(() => {
-        console.log('Datos cargados correctamente');
-        renderizarCalendario();
-    }).catch(error => {
-        console.error('Error cargando datos:', error);
-    });
-    
-    // Event listeners
-    const prevBtn = document.getElementById('prev-month');
-    const nextBtn = document.getElementById('next-month');
-    const imagenInput = document.getElementById('imagen');
-    const reservarBtn = document.getElementById('reservar-btn');
-    const nombreInput = document.getElementById('nombre');
-    const apellidoInput = document.getElementById('apellido');
-    
-    if (prevBtn) prevBtn.addEventListener('click', () => cambiarMes(-1));
-    if (nextBtn) nextBtn.addEventListener('click', () => cambiarMes(1));
-    if (imagenInput) imagenInput.addEventListener('change', previewImagen);
-    if (reservarBtn) reservarBtn.addEventListener('click', reservarTurno);
-    if (nombreInput) nombreInput.addEventListener('input', validarPaso1);
-    if (apellidoInput) apellidoInput.addEventListener('input', validarPaso1);
-    if (imagenInput) imagenInput.addEventListener('change', validarPaso1);
-}
-
+// ========== FUNCIONES DE NAVEGACIÓN ==========
 function nextStep(step) {
-    if (step === 2 && !validarPaso1()) {
-        alert('Completá todos tus datos primero 💅');
-        return;
+    console.log('Next step llamado:', step);
+    
+    if (step === 2) {
+        // Validar paso 1
+        const nombre = document.getElementById('nombre')?.value;
+        const apellido = document.getElementById('apellido')?.value;
+        const imagen = document.getElementById('imagen')?.files[0];
+        
+        if (!nombre || !apellido || !imagen) {
+            alert('Completá todos tus datos primero 💅');
+            return;
+        }
     }
     
     if (step === 3 && !fechaSeleccionada) {
@@ -108,9 +90,21 @@ function nextStep(step) {
         return;
     }
     
-    document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
-    document.getElementById(`step${step}`).classList.add('active');
+    // Ocultar todos los pasos
+    document.querySelectorAll('.step-content').forEach(el => {
+        el.classList.remove('active');
+    });
     
+    // Mostrar el paso seleccionado
+    const stepElement = document.getElementById(`step${step}`);
+    if (stepElement) {
+        stepElement.classList.add('active');
+    } else {
+        console.error(`No se encontró step${step}`);
+        return;
+    }
+    
+    // Actualizar progress bar
     document.querySelectorAll('.progress-step').forEach((el, index) => {
         if (index + 1 <= step) {
             el.classList.add('active');
@@ -119,17 +113,31 @@ function nextStep(step) {
         }
     });
     
-    document.querySelector('.progress-bar').setAttribute('data-step', step);
+    const progressBar = document.querySelector('.progress-bar');
+    if (progressBar) {
+        progressBar.setAttribute('data-step', step);
+    }
+    
     currentStep = step;
     
     if (step === 3) {
         actualizarResumen();
     }
+    
+    console.log('Paso actual:', step);
 }
 
 function prevStep(step) {
-    document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
-    document.getElementById(`step${step}`).classList.add('active');
+    console.log('Prev step llamado:', step);
+    
+    document.querySelectorAll('.step-content').forEach(el => {
+        el.classList.remove('active');
+    });
+    
+    const stepElement = document.getElementById(`step${step}`);
+    if (stepElement) {
+        stepElement.classList.add('active');
+    }
     
     document.querySelectorAll('.progress-step').forEach((el, index) => {
         if (index + 1 <= step) {
@@ -139,7 +147,11 @@ function prevStep(step) {
         }
     });
     
-    document.querySelector('.progress-bar').setAttribute('data-step', step);
+    const progressBar = document.querySelector('.progress-bar');
+    if (progressBar) {
+        progressBar.setAttribute('data-step', step);
+    }
+    
     currentStep = step;
 }
 
@@ -162,12 +174,15 @@ function validarPaso1() {
     return false;
 }
 
+// ========== FUNCIONES DEL CALENDARIO ==========
 function cambiarMes(delta) {
     fechaActual.setMonth(fechaActual.getMonth() + delta);
     renderizarCalendario();
 }
 
 function renderizarCalendario() {
+    console.log('Renderizando calendario...');
+    
     const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
     const monthElement = document.getElementById('current-month');
     if (monthElement) {
@@ -177,14 +192,14 @@ function renderizarCalendario() {
     const primerDia = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), 1);
     const ultimoDia = new Date(fechaActual.getFullYear(), fechaActual.getMonth() + 1, 0);
     
-    // Obtener fecha de HOY para comparar
+    // Obtener fecha de HOY
     const hoy = new Date();
     const hoyStr = formatearFecha(hoy);
     const hoyObj = new Date(hoyStr + 'T12:00:00-03:00');
     
     let dias = [];
     
-    // Días del mes anterior
+    // Días del mes anterior (para alinear el calendario)
     const diaSemanaPrimero = primerDia.getDay();
     const diasAntes = diaSemanaPrimero === 0 ? 6 : diaSemanaPrimero - 1;
     for (let i = 0; i < diasAntes; i++) {
@@ -196,21 +211,19 @@ function renderizarCalendario() {
         const fecha = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), i);
         const fechaStr = formatearFecha(fecha);
         
-        // Comparar con fecha actual
         const fechaObj = new Date(fechaStr + 'T12:00:00-03:00');
         const esFechaPasada = fechaObj < hoyObj;
-        const esFinde = esFinde(fecha);
+        const esFindeSemana = esFinde(fecha);
         const esBloqueado = diaEstaBloqueado(fechaStr);
         const turnosEnFecha = turnosCargados.filter(t => t.fecha === fechaStr);
         
         let tipoClase = 'calendar-day';
         
-        // LÓGICA CORREGIDA
-        if (esFinde) {
+        if (esFindeSemana) {
             tipoClase += ' weekend';
         }
         else if (esFechaPasada) {
-            tipoClase += ' pasado'; // Días que ya pasaron
+            tipoClase += ' pasado';
         }
         else if (esBloqueado) {
             tipoClase += ' unavailable';
@@ -219,11 +232,10 @@ function renderizarCalendario() {
             tipoClase += ' ocupado';
         }
         else {
-            tipoClase += ' available'; // Solo días FUTUROS y disponibles
+            tipoClase += ' available';
         }
         
-        // Determinar si es seleccionable
-        const seleccionable = !esFinde && !esFechaPasada && !esBloqueado && turnosEnFecha.length < horariosDisponibles.length;
+        const seleccionable = !esFindeSemana && !esFechaPasada && !esBloqueado && turnosEnFecha.length < horariosDisponibles.length;
         
         dias.push({
             tipo: 'dia',
@@ -234,21 +246,26 @@ function renderizarCalendario() {
         });
     }
     
-    const calendarHTML = dias.map(dia => {
-        if (dia.tipo === 'empty') {
-            return '<div class="calendar-day empty"></div>';
-        } else {
-            return `<div class="${dia.clase}" data-fecha="${dia.fechaStr}" onclick="${dia.disponible ? `window.seleccionarDia('${dia.fechaStr}')` : ''}">${dia.fecha.getDate()}</div>`;
-        }
-    }).join('');
-    
     const calendarElement = document.getElementById('calendar-days');
     if (calendarElement) {
-        calendarElement.innerHTML = calendarHTML;
+        let html = '';
+        dias.forEach(dia => {
+            if (dia.tipo === 'empty') {
+                html += '<div class="calendar-day empty"></div>';
+            } else {
+                const onclickAttr = dia.disponible ? `onclick="window.seleccionarDia('${dia.fechaStr}')"` : '';
+                html += `<div class="${dia.clase}" data-fecha="${dia.fechaStr}" ${onclickAttr}>${dia.fecha.getDate()}</div>`;
+            }
+        });
+        calendarElement.innerHTML = html;
+        console.log(`Calendario renderizado con ${dias.length} celdas`);
+    } else {
+        console.error('No se encontró el elemento calendar-days');
     }
 }
 
 function seleccionarDia(fechaStr) {
+    console.log('Día seleccionado:', fechaStr);
     if (!fechaStr) return;
     
     document.querySelectorAll('.calendar-day.selected').forEach(el => {
@@ -256,7 +273,9 @@ function seleccionarDia(fechaStr) {
     });
     
     const diaElement = document.querySelector(`[data-fecha="${fechaStr}"]`);
-    if (diaElement) diaElement.classList.add('selected');
+    if (diaElement) {
+        diaElement.classList.add('selected');
+    }
     
     fechaSeleccionada = fechaStr;
     
@@ -268,7 +287,9 @@ function seleccionarDia(fechaStr) {
     mostrarHorariosDisponibles(fechaStr);
     
     const btnToStep3 = document.getElementById('btn-to-step3');
-    if (btnToStep3) btnToStep3.disabled = false;
+    if (btnToStep3) {
+        btnToStep3.disabled = false;
+    }
 }
 
 function mostrarHorariosDisponibles(fechaStr) {
@@ -278,19 +299,19 @@ function mostrarHorariosDisponibles(fechaStr) {
     const turnosEnFecha = turnosCargados.filter(t => t.fecha === fechaStr);
     const horasOcupadas = turnosEnFecha.map(t => t.hora);
     
-    const horariosHTML = horariosDisponibles.map(h => {
+    let html = '';
+    horariosDisponibles.forEach(h => {
         const ocupado = horasOcupadas.includes(h.hora);
-        return `<div class="horario-item ${ocupado ? 'ocupado' : ''}" 
-                     data-hora="${h.hora}" 
-                     onclick="${!ocupado ? `window.seleccionarHora('${h.hora}')` : ''}">
-                    <span>${h.hora}</span>
-                </div>`;
-    }).join('');
+        const onclickAttr = !ocupado ? `onclick="window.seleccionarHora('${h.hora}')"` : '';
+        html += `<div class="horario-item ${ocupado ? 'ocupado' : ''}" data-hora="${h.hora}" ${onclickAttr}><span>${h.hora}</span></div>`;
+    });
     
-    horariosContainer.innerHTML = horariosHTML;
+    horariosContainer.innerHTML = html;
 }
 
 function seleccionarHora(hora) {
+    console.log('Hora seleccionada:', hora);
+    
     document.querySelectorAll('.horario-item').forEach(el => {
         el.classList.remove('selected');
     });
@@ -310,10 +331,10 @@ function actualizarResumen() {
     const resumenContainer = document.getElementById('resumen-contenido');
     if (!resumenContainer) return;
     
-    let resumenHTML = '';
+    let html = '';
     
     if (nombre && apellido) {
-        resumenHTML += `
+        html += `
             <div class="resumen-item">
                 <strong>Cliente</strong>
                 <p>${nombre} ${apellido}</p>
@@ -322,7 +343,7 @@ function actualizarResumen() {
     }
     
     if (fechaSeleccionada) {
-        resumenHTML += `
+        html += `
             <div class="resumen-item">
                 <strong>Fecha</strong>
                 <p>${formatearFechaLegible(fechaSeleccionada)}</p>
@@ -331,7 +352,7 @@ function actualizarResumen() {
     }
     
     if (horaSeleccionada) {
-        resumenHTML += `
+        html += `
             <div class="resumen-item">
                 <strong>Hora</strong>
                 <p>${horaSeleccionada} hs</p>
@@ -339,7 +360,7 @@ function actualizarResumen() {
         `;
     }
     
-    resumenContainer.innerHTML = resumenHTML || '<p>Completá los datos para ver el resumen</p>';
+    resumenContainer.innerHTML = html || '<p>Completá los datos para ver el resumen</p>';
 }
 
 function previewImagen(event) {
@@ -414,7 +435,6 @@ async function reservarTurno() {
             modal.style.display = 'flex';
         }
         
-        // Resetear formulario después de 2 segundos
         setTimeout(() => {
             location.reload();
         }, 3000);
@@ -454,7 +474,6 @@ function initAdminPage() {
         console.error('Error cargando datos:', error);
     });
     
-    // Filtros
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -478,7 +497,6 @@ function actualizarStats() {
     }
     
     const turnosSemana = turnosCargados.filter(t => semanaStr.includes(t.fecha)).length;
-    
     const turnosPendientes = turnosCargados.filter(t => t.fecha >= hoyStr).length;
     
     const statsHoy = document.getElementById('stats-hoy');
@@ -704,7 +722,6 @@ async function desbloquearDia(id) {
 
 function showNotification(mensaje, tipo) {
     const notification = document.createElement('div');
-    notification.className = `notification ${tipo}`;
     notification.innerHTML = `
         <i class="fas ${tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
         <span>${mensaje}</span>
@@ -728,9 +745,61 @@ function showNotification(mensaje, tipo) {
     document.body.appendChild(notification);
     
     setTimeout(() => {
-        notification.style.animation = 'slideOutRight 0.3s ease';
-        setTimeout(() => notification.remove(), 300);
+        notification.remove();
     }, 3000);
+}
+
+// ========== INICIALIZACIÓN ==========
+function initClientePage() {
+    console.log('Inicializando página cliente...');
+    
+    // Verificar que los elementos existen
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+    const step3 = document.getElementById('step3');
+    
+    console.log('Step1 existe:', !!step1);
+    console.log('Step2 existe:', !!step2);
+    console.log('Step3 existe:', !!step3);
+    
+    if (!step1 || !step2 || !step3) {
+        console.error('Faltan elementos step en el DOM');
+    }
+    
+    Promise.all([
+        cargarTurnos(),
+        cargarHorarios(),
+        cargarDiasBloqueados()
+    ]).then(() => {
+        console.log('Datos cargados:');
+        console.log('- Turnos:', turnosCargados.length);
+        console.log('- Horarios:', horariosDisponibles.length);
+        console.log('- Bloqueos:', diasBloqueados.length);
+        
+        renderizarCalendario();
+    }).catch(error => {
+        console.error('Error cargando datos:', error);
+        // Aún así renderizar calendario con datos vacíos
+        renderizarCalendario();
+    });
+    
+    // Event listeners
+    const prevBtn = document.getElementById('prev-month');
+    const nextBtn = document.getElementById('next-month');
+    const imagenInput = document.getElementById('imagen');
+    const reservarBtn = document.getElementById('reservar-btn');
+    const nombreInput = document.getElementById('nombre');
+    const apellidoInput = document.getElementById('apellido');
+    
+    if (prevBtn) prevBtn.addEventListener('click', () => cambiarMes(-1));
+    if (nextBtn) nextBtn.addEventListener('click', () => cambiarMes(1));
+    if (imagenInput) imagenInput.addEventListener('change', previewImagen);
+    if (reservarBtn) reservarBtn.addEventListener('click', reservarTurno);
+    if (nombreInput) nombreInput.addEventListener('input', validarPaso1);
+    if (apellidoInput) apellidoInput.addEventListener('input', validarPaso1);
+    if (imagenInput) imagenInput.addEventListener('change', validarPaso1);
+    
+    console.log('initClientePage completado');
 }
 
 // Hacer funciones globales
