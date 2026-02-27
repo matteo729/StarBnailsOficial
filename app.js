@@ -14,7 +14,6 @@ let turnosCargados = [];
 let horariosDisponibles = [];
 let diasBloqueados = [];
 let archivoImagen = null;
-let imagenPublicUrl = null;
 let currentStep = 1;
 
 // ========== FUNCIONES COMPARTIDAS ==========
@@ -22,7 +21,8 @@ async function cargarTurnos() {
     const { data, error } = await supabaseClient
         .from('turnos')
         .select('*')
-        .order('fecha', { ascending: true });
+        .order('fecha', { ascending: true })
+        .order('hora', { ascending: true });
     
     if (!error) turnosCargados = data || [];
     return turnosCargados;
@@ -33,7 +33,7 @@ async function cargarHorarios() {
         .from('horarios')
         .select('*')
         .eq('activo', true)
-        .order('hora');
+        .order('hora', { ascending: true });
     
     if (!error) horariosDisponibles = data || [];
     return horariosDisponibles;
@@ -42,7 +42,8 @@ async function cargarHorarios() {
 async function cargarDiasBloqueados() {
     const { data, error } = await supabaseClient
         .from('dias_bloqueados')
-        .select('*');
+        .select('*')
+        .order('fecha', { ascending: true });
     
     if (!error) diasBloqueados = data || [];
     return diasBloqueados;
@@ -92,27 +93,24 @@ function debounce(func, wait) {
 // ========== FUNCIONES DE NAVEGACIÓN ==========
 function nextStep(step) {
     if (step === 2 && !validarPaso1()) {
-        mostrarNotificacion('Completá todos tus datos primero 💅', 'info');
+        mostrarNotificacion('Completá todos tus datos primero', 'info');
         return;
     }
     
     if (step === 3 && !fechaSeleccionada) {
-        mostrarNotificacion('Seleccioná una fecha 📅', 'info');
+        mostrarNotificacion('Seleccioná una fecha', 'info');
         return;
     }
     
-    // Ocultar todos los pasos
     document.querySelectorAll('.step-content').forEach(el => {
         el.classList.remove('active');
     });
     
-    // Mostrar el paso seleccionado
     const stepElement = document.getElementById(`step${step}`);
     if (stepElement) {
         stepElement.classList.add('active');
     }
     
-    // Actualizar progress bar
     document.querySelectorAll('.progress-step').forEach((el, index) => {
         if (index + 1 <= step) {
             el.classList.add('active');
@@ -132,7 +130,6 @@ function nextStep(step) {
         actualizarResumen();
     }
     
-    // Scroll suave al inicio del paso (importante en móvil)
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -173,11 +170,9 @@ function validarPaso1() {
     if (btnToStep3) {
         if (nombre && apellido && imagen) {
             btnToStep3.disabled = false;
-            btnToStep3.classList.add('pulse');
             return true;
         } else {
             btnToStep3.disabled = true;
-            btnToStep3.classList.remove('pulse');
             return false;
         }
     }
@@ -200,20 +195,17 @@ function renderizarCalendario() {
     const primerDia = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), 1);
     const ultimoDia = new Date(fechaActual.getFullYear(), fechaActual.getMonth() + 1, 0);
     
-    // Obtener fecha de HOY
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
     
     let html = '';
     
-    // Días del mes anterior (para alinear)
     const diaSemanaPrimero = primerDia.getDay();
     const diasAntes = diaSemanaPrimero === 0 ? 6 : diaSemanaPrimero - 1;
     for (let i = 0; i < diasAntes; i++) {
         html += '<div class="calendar-day empty"></div>';
     }
     
-    // Días del mes actual
     for (let i = 1; i <= ultimoDia.getDate(); i++) {
         const fecha = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), i);
         fecha.setHours(0, 0, 0, 0);
@@ -274,7 +266,6 @@ function seleccionarDia(fechaStr) {
     const btnToStep3 = document.getElementById('btn-to-step3');
     if (btnToStep3) {
         btnToStep3.disabled = false;
-        btnToStep3.classList.add('pulse');
     }
 }
 
@@ -320,7 +311,7 @@ function actualizarResumen() {
     if (nombre && apellido) {
         html += `
             <div class="resumen-item">
-                <strong>Cliente</strong>
+                <strong>cliente</strong>
                 <p>${nombre} ${apellido}</p>
             </div>
         `;
@@ -329,7 +320,7 @@ function actualizarResumen() {
     if (fechaSeleccionada) {
         html += `
             <div class="resumen-item">
-                <strong>Fecha</strong>
+                <strong>fecha</strong>
                 <p>${formatearFechaLegible(fechaSeleccionada)}</p>
             </div>
         `;
@@ -338,20 +329,18 @@ function actualizarResumen() {
     if (horaSeleccionada) {
         html += `
             <div class="resumen-item">
-                <strong>Hora</strong>
+                <strong>hora</strong>
                 <p>${horaSeleccionada} hs</p>
             </div>
         `;
     }
     
-    resumenContainer.innerHTML = html || '<p class="text-muted">Completá los datos para ver el resumen</p>';
+    resumenContainer.innerHTML = html || '<p class="text-muted">completá los datos</p>';
 }
 
-// ========== SUBIDA DE IMAGEN ==========
 function previewImagen(event) {
     const file = event.target.files[0];
     if (file) {
-        // Validar tamaño (máx 5MB para móvil)
         if (file.size > 5 * 1024 * 1024) {
             mostrarNotificacion('La imagen es muy grande (máx 5MB)', 'error');
             event.target.value = '';
@@ -372,35 +361,7 @@ function previewImagen(event) {
     }
 }
 
-async function subirImagen() {
-    if (!archivoImagen) return null;
-    
-    try {
-        const fileExt = archivoImagen.name.split('.').pop();
-        const fileName = `${Date.now()}.${fileExt}`;
-        
-        const { error: uploadError } = await supabaseClient.storage
-            .from('imagenes-uvas')
-            .upload(fileName, archivoImagen, {
-                cacheControl: '3600',
-                upsert: false
-            });
-        
-        if (uploadError) throw uploadError;
-        
-        const { data: { publicUrl } } = supabaseClient.storage
-            .from('imagenes-uvas')
-            .getPublicUrl(fileName);
-        
-        return publicUrl;
-        
-    } catch (error) {
-        console.error('Error subiendo imagen:', error);
-        throw error;
-    }
-}
-
-// ========== RESERVA CON WHATSAPP ==========
+// ========== RESERVA CON WHATSAPP (OPTIMIZADA PARA IPHONE) ==========
 async function reservarTurno() {
     const nombre = document.getElementById('nombre')?.value?.trim();
     const apellido = document.getElementById('apellido')?.value?.trim();
@@ -416,9 +377,6 @@ async function reservarTurno() {
     btnReservar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> procesando...';
     
     try {
-        // Subir imagen primero
-        mostrarNotificacion('subiendo imagen...', 'info');
-        
         const fileExt = archivoImagen.name.split('.').pop();
         const fileName = `${Date.now()}.${fileExt}`;
         
@@ -432,7 +390,6 @@ async function reservarTurno() {
             .from('imagenes-uvas')
             .getPublicUrl(fileName);
         
-        // Guardar en Supabase
         const { error: dbError } = await supabaseClient
             .from('turnos')
             .insert([{
@@ -445,20 +402,16 @@ async function reservarTurno() {
         
         if (dbError) throw dbError;
         
-        // ✅ CORREGIDO PARA IPHONE: crear enlace de WhatsApp
         const fechaLegible = formatearFechaWhatsApp(fechaSeleccionada);
         const mensaje = `Hola, me llamo ${nombre} ${apellido}, reservé un turno para el día ${fechaLegible} a las ${horaSeleccionada}.`;
         const mensajeCodificado = encodeURIComponent(mensaje);
         const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${mensajeCodificado}`;
         
-        // ✅ IPHONE FIX: usar location.href en lugar de window.open
-        // Esto funciona mejor en iOS porque no es bloqueado por popup blockers
+        // Para iPhone: usar location.href en lugar de window.open
         window.location.href = whatsappUrl;
         
-        // Mostrar éxito
         mostrarNotificacion('¡turno reservado!', 'success');
         
-        // Resetear después de 2 segundos
         setTimeout(() => {
             location.reload();
         }, 2000);
@@ -469,6 +422,14 @@ async function reservarTurno() {
         btnReservar.disabled = false;
         btnReservar.innerHTML = textoOriginal;
     }
+}
+
+function closeModal() {
+    const modal = document.getElementById('success-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    location.reload();
 }
 
 // ========== NOTIFICACIONES ==========
@@ -482,66 +443,12 @@ function mostrarNotificacion(mensaje, tipo) {
     
     document.body.appendChild(notificacion);
     
-    // Mostrar con animación
     setTimeout(() => notificacion.classList.add('show'), 10);
     
-    // Ocultar después de 3 segundos
     setTimeout(() => {
         notificacion.classList.remove('show');
         setTimeout(() => notificacion.remove(), 300);
     }, 3000);
-}
-
-// ========== INICIALIZACIÓN ==========
-function initClientePage() {
-    // Cargar datos
-    Promise.all([
-        cargarTurnos(),
-        cargarHorarios(),
-        cargarDiasBloqueados()
-    ]).then(() => {
-        renderizarCalendario();
-    }).catch(error => {
-        console.error('Error cargando datos:', error);
-        renderizarCalendario();
-    });
-    
-    // Event listeners con debounce para rendimiento
-    const prevBtn = document.getElementById('prev-month');
-    const nextBtn = document.getElementById('next-month');
-    const imagenInput = document.getElementById('imagen');
-    const reservarBtn = document.getElementById('reservar-btn');
-    const nombreInput = document.getElementById('nombre');
-    const apellidoInput = document.getElementById('apellido');
-    
-    if (prevBtn) prevBtn.addEventListener('click', () => cambiarMes(-1));
-    if (nextBtn) nextBtn.addEventListener('click', () => cambiarMes(1));
-    if (imagenInput) imagenInput.addEventListener('change', previewImagen);
-    if (reservarBtn) reservarBtn.addEventListener('click', reservarTurno);
-    if (nombreInput) nombreInput.addEventListener('input', debounce(validarPaso1, 300));
-    if (apellidoInput) apellidoInput.addEventListener('input', debounce(validarPaso1, 300));
-}
-
-function initAdminPage() {
-    Promise.all([
-        cargarTurnos(),
-        cargarHorarios(),
-        cargarDiasBloqueados()
-    ]).then(() => {
-        mostrarTurnos();
-        actualizarStats();
-        mostrarHorariosAdmin();
-        mostrarDiasBloqueados();
-    });
-    
-    // Filtros
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            filtrarTurnos(this.dataset.filter);
-        });
-    });
 }
 
 // ========== FUNCIONES ADMIN ==========
@@ -610,35 +517,121 @@ function showTab(tab) {
     }
 }
 
+// ========== FUNCIÓN MEJORADA PARA ELIMINAR TURNOS (CON IMAGEN) ==========
+async function eliminarTurno(id) {
+    if (!confirm('¿Eliminar este turno?')) return;
+    
+    mostrarNotificacion('Eliminando turno...', 'info');
+    
+    try {
+        // 1. Obtener datos del turno
+        const { data: turno, error: fetchError } = await supabaseClient
+            .from('turnos')
+            .select('*')
+            .eq('id', id)
+            .single();
+        
+        if (fetchError) {
+            console.error('Error obteniendo turno:', fetchError);
+            mostrarNotificacion('No se encontró el turno', 'error');
+            return;
+        }
+        
+        console.log('Turno a eliminar:', turno);
+        
+        // 2. Eliminar imagen del Storage (si existe)
+        if (turno?.imagen_url) {
+            try {
+                const urlParts = turno.imagen_url.split('/');
+                const fileName = urlParts[urlParts.length - 1];
+                
+                console.log('Eliminando imagen:', fileName);
+                
+                const { error: storageError } = await supabaseClient.storage
+                    .from('imagenes-uvas')
+                    .remove([fileName]);
+                
+                if (storageError) {
+                    console.error('Error eliminando imagen:', storageError);
+                    mostrarNotificacion('No se pudo eliminar la imagen', 'warning');
+                } else {
+                    console.log('✅ Imagen eliminada:', fileName);
+                }
+            } catch (storageError) {
+                console.error('Error en storage:', storageError);
+            }
+        }
+        
+        // 3. Eliminar turno de la base de datos
+        const { error: deleteError } = await supabaseClient
+            .from('turnos')
+            .delete()
+            .eq('id', id);
+        
+        if (deleteError) {
+            console.error('Error eliminando turno:', deleteError);
+            mostrarNotificacion('Error al eliminar el turno', 'error');
+            return;
+        }
+        
+        console.log('✅ Turno eliminado de la DB');
+        
+        // 4. Éxito
+        mostrarNotificacion('Turno eliminado correctamente', 'success');
+        
+        // 5. Recargar la lista sin recargar toda la página (mejor UX)
+        await cargarTurnos();
+        actualizarStats();
+        mostrarTurnos();
+        
+        // También recargar si estamos en la pestaña de horarios o bloqueos
+        if (document.getElementById('horarios-tab')?.classList.contains('active')) {
+            await cargarHorarios();
+            mostrarHorariosAdmin();
+        }
+        if (document.getElementById('bloqueos-tab')?.classList.contains('active')) {
+            await cargarDiasBloqueados();
+            mostrarDiasBloqueados();
+        }
+        
+    } catch (error) {
+        console.error('Error inesperado:', error);
+        mostrarNotificacion('Error: ' + error.message, 'error');
+    }
+}
+
 function mostrarTurnos(turnos = turnosCargados) {
     const container = document.getElementById('turnos-list');
     if (!container) return;
     
     if (turnos.length === 0) {
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-calendar-times"></i><p>No hay turnos reservados</p></div>';
+        container.innerHTML = '<div class="empty-state"><i class="far fa-calendar-times"></i><p>no hay turnos reservados</p></div>';
         return;
     }
     
-    const turnosHTML = turnos.sort((a, b) => {
+    // ORDEN CORRECTO: por fecha y hora (más próximo primero)
+    const turnosOrdenados = [...turnos].sort((a, b) => {
         if (a.fecha === b.fecha) {
             return a.hora.localeCompare(b.hora);
         }
         return a.fecha.localeCompare(b.fecha);
-    }).map(t => `
+    });
+    
+    const turnosHTML = turnosOrdenados.map((t, index) => `
         <div class="turno-card">
             <div class="turno-card-header">
-                <h3><i class="fas fa-user"></i> ${t.nombre} ${t.apellido}</h3>
-                <span class="turno-badge">#${t.id}</span>
+                <h3><i class="far fa-user"></i> ${t.nombre} ${t.apellido}</h3>
+                <span class="turno-badge">${index + 1}</span>
             </div>
             <div class="turno-card-body">
                 <div class="turno-info">
-                    <p><i class="fas fa-calendar"></i> ${formatearFechaLegible(t.fecha)}</p>
-                    <p><i class="fas fa-clock"></i> ${t.hora} hs</p>
+                    <p><i class="far fa-calendar"></i> ${formatearFechaLegible(t.fecha)}</p>
+                    <p><i class="far fa-clock"></i> ${t.hora} hs</p>
                 </div>
-                <img src="${t.imagen_url}" alt="Diseño de uñas" class="turno-imagen" onclick="window.open(this.src)" loading="lazy">
+                <img src="${t.imagen_url}" alt="diseño" class="turno-imagen" onclick="window.open(this.src)" loading="lazy">
                 <div class="turno-actions">
                     <button onclick="eliminarTurno(${t.id})" class="btn-eliminar">
-                        <i class="fas fa-trash"></i> Eliminar
+                        <i class="fas fa-trash"></i> eliminar
                     </button>
                 </div>
             </div>
@@ -648,66 +641,12 @@ function mostrarTurnos(turnos = turnosCargados) {
     container.innerHTML = turnosHTML;
 }
 
-async function eliminarTurno(id) {
-    if (!confirm('¿Eliminar este turno?')) return;
-    
-    try {
-        // 1️⃣ PRIMERO: obtener los datos del turno para saber qué imagen eliminar
-        const { data: turno, error: fetchError } = await supabaseClient
-            .from('turnos')
-            .select('*')
-            .eq('id', id)
-            .single();
-        
-        if (fetchError) throw fetchError;
-        
-        // 2️⃣ SEGUNDO: eliminar la imagen del Storage
-        if (turno?.imagen_url) {
-            // Extraer el nombre del archivo de la URL
-            // La URL es algo como: https://.../storage/v1/object/public/imagenes-uvas/nombre-archivo.jpg
-            const urlParts = turno.imagen_url.split('/');
-            const fileName = urlParts[urlParts.length - 1]; // Última parte = nombre del archivo
-            
-            console.log('Eliminando imagen:', fileName);
-            
-            const { error: storageError } = await supabaseClient.storage
-                .from('imagenes-uvas')
-                .remove([fileName]);
-            
-            if (storageError) {
-                console.error('Error eliminando imagen:', storageError);
-                // Continuamos igual, intentamos eliminar el turno
-            }
-        }
-        
-        // 3️⃣ TERCERO: eliminar el turno de la base de datos
-        const { error: deleteError } = await supabaseClient
-            .from('turnos')
-            .delete()
-            .eq('id', id);
-        
-        if (deleteError) throw deleteError;
-        
-        // 4️⃣ ÉXITO
-        mostrarNotificacion('Turno e imagen eliminados', 'success');
-        
-        // Recargar después de 1 segundo
-        setTimeout(() => {
-            location.reload();
-        }, 1000);
-        
-    } catch (error) {
-        console.error('Error eliminando turno:', error);
-        mostrarNotificacion('Error: ' + error.message, 'error');
-    }
-}
-
 function mostrarHorariosAdmin() {
     const container = document.getElementById('horarios-list');
     if (!container) return;
     
     if (horariosDisponibles.length === 0) {
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-clock"></i><p>No hay horarios configurados</p></div>';
+        container.innerHTML = '<div class="empty-state"><i class="far fa-clock"></i><p>no hay horarios configurados</p></div>';
         return;
     }
     
@@ -715,7 +654,7 @@ function mostrarHorariosAdmin() {
         <div class="horario-admin-item">
             <span class="hora">${h.hora}</span>
             <button onclick="eliminarHorario(${h.id})">
-                <i class="fas fa-trash"></i> Quitar
+                <i class="fas fa-trash"></i> quitar
             </button>
         </div>
     `).join('');
@@ -764,7 +703,7 @@ function mostrarDiasBloqueados() {
     if (!container) return;
     
     if (diasBloqueados.length === 0) {
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-calendar-check"></i><p>No hay días bloqueados</p></div>';
+        container.innerHTML = '<div class="empty-state"><i class="far fa-calendar-check"></i><p>no hay días bloqueados</p></div>';
         return;
     }
     
@@ -775,7 +714,7 @@ function mostrarDiasBloqueados() {
                 ${d.motivo ? `<small>${d.motivo}</small>` : ''}
             </div>
             <button onclick="desbloquearDia(${d.id})">
-                <i class="fas fa-unlock"></i> Desbloquear
+                <i class="fas fa-unlock"></i> desbloquear
             </button>
         </div>
     `).join('');
@@ -819,6 +758,55 @@ async function desbloquearDia(id) {
     }
 }
 
+// ========== INICIALIZACIÓN ==========
+function initClientePage() {
+    Promise.all([
+        cargarTurnos(),
+        cargarHorarios(),
+        cargarDiasBloqueados()
+    ]).then(() => {
+        renderizarCalendario();
+    }).catch(error => {
+        console.error('Error cargando datos:', error);
+        renderizarCalendario();
+    });
+    
+    const prevBtn = document.getElementById('prev-month');
+    const nextBtn = document.getElementById('next-month');
+    const imagenInput = document.getElementById('imagen');
+    const reservarBtn = document.getElementById('reservar-btn');
+    const nombreInput = document.getElementById('nombre');
+    const apellidoInput = document.getElementById('apellido');
+    
+    if (prevBtn) prevBtn.addEventListener('click', () => cambiarMes(-1));
+    if (nextBtn) nextBtn.addEventListener('click', () => cambiarMes(1));
+    if (imagenInput) imagenInput.addEventListener('change', previewImagen);
+    if (reservarBtn) reservarBtn.addEventListener('click', reservarTurno);
+    if (nombreInput) nombreInput.addEventListener('input', debounce(validarPaso1, 300));
+    if (apellidoInput) apellidoInput.addEventListener('input', debounce(validarPaso1, 300));
+}
+
+function initAdminPage() {
+    Promise.all([
+        cargarTurnos(),
+        cargarHorarios(),
+        cargarDiasBloqueados()
+    ]).then(() => {
+        mostrarTurnos();
+        actualizarStats();
+        mostrarHorariosAdmin();
+        mostrarDiasBloqueados();
+    });
+    
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            filtrarTurnos(this.dataset.filter);
+        });
+    });
+}
+
 // Hacer funciones globales
 window.seleccionarDia = seleccionarDia;
 window.seleccionarHora = seleccionarHora;
@@ -830,7 +818,6 @@ window.eliminarHorario = eliminarHorario;
 window.bloquearDia = bloquearDia;
 window.desbloquearDia = desbloquearDia;
 window.eliminarTurno = eliminarTurno;
+window.closeModal = closeModal;
 window.initClientePage = initClientePage;
 window.initAdminPage = initAdminPage;
-
-
