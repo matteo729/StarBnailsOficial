@@ -3,120 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STARBNAILS ✨ - Panel Admin</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>starbnails · panel admin</title>
+    
+    <!-- Fonts e íconos -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Estilos -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="admin-body">
     <div class="admin-container">
-        <header class="admin-header fade-in">
+        <!-- Header admin -->
+        <header class="admin-header">
             <div class="admin-header-content">
-                <h1><i class="fas fa-crown"></i> Panel Admin</h1>
-                <p>Gestioná tus turnos con estilo ✨</p>
+                <h1><i class="far fa-crown"></i> starbnails</h1>
+                <p>panel de administración</p>
             </div>
             <a href="index.html" class="btn-home">
-                <i class="fas fa-arrow-left"></i>
-                <span>Volver a la web</span>
+                <i class="fas fa-arrow-left"></i> volver al sitio
             </a>
         </header>
 
-        <!-- Stats Cards -->
-        <div class="stats-grid slide-up">
+        <!-- Stats elegantes -->
+        <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+                <div class="stat-icon"><i class="far fa-calendar-check"></i></div>
                 <div class="stat-info">
                     <h3 id="stats-hoy">0</h3>
-                    <p>Turnos hoy</p>
+                    <p>turnos hoy</p>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-users"></i></div>
+                <div class="stat-icon"><i class="far fa-calendar-alt"></i></div>
                 <div class="stat-info">
                     <h3 id="stats-semana">0</h3>
-                    <p>Esta semana</p>
+                    <p>esta semana</p>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                <div class="stat-icon"><i class="far fa-clock"></i></div>
                 <div class="stat-info">
                     <h3 id="stats-pendientes">0</h3>
-                    <p>Próximos</p>
+                    <p>próximos</p>
                 </div>
             </div>
         </div>
 
-        <!-- Tabs elegantes -->
-        <div class="admin-tabs slide-up">
+        <!-- Tabs -->
+        <div class="admin-tabs">
             <button class="tab-btn active" onclick="showTab('turnos')">
-                <i class="fas fa-calendar-alt"></i>
-                <span>Turnos</span>
+                <i class="fas fa-calendar-check"></i>
+                <span>turnos</span>
             </button>
             <button class="tab-btn" onclick="showTab('horarios')">
                 <i class="fas fa-clock"></i>
-                <span>Horarios</span>
+                <span>horarios</span>
             </button>
             <button class="tab-btn" onclick="showTab('bloqueos')">
                 <i class="fas fa-ban"></i>
-                <span>Días bloqueados</span>
+                <span>bloqueos</span>
             </button>
         </div>
 
         <!-- Pestaña Turnos -->
-        <div id="turnos-tab" class="tab-content active fade-in">
+        <div id="turnos-tab" class="tab-content active">
             <div class="turnos-filters">
-                <button class="filter-btn active" data-filter="all">Todos</button>
-                <button class="filter-btn" data-filter="hoy">Hoy</button>
-                <button class="filter-btn" data-filter="semana">Esta semana</button>
+                <button class="filter-btn active" data-filter="all">todos</button>
+                <button class="filter-btn" data-filter="hoy">hoy</button>
+                <button class="filter-btn" data-filter="semana">semana</button>
             </div>
             <div id="turnos-list" class="turnos-grid"></div>
         </div>
 
         <!-- Pestaña Horarios -->
-        <div id="horarios-tab" class="tab-content fade-in">
+        <div id="horarios-tab" class="tab-content">
             <div class="admin-card">
-                <h3><i class="fas fa-plus-circle"></i> Agregar nuevo horario</h3>
+                <h3><i class="fas fa-plus-circle"></i> agregar horario</h3>
                 <div class="add-horario">
                     <div class="input-group">
-                        <i class="fas fa-clock"></i>
+                        <i class="far fa-clock"></i>
                         <input type="time" id="nuevo-horario" step="3600">
                     </div>
                     <button onclick="agregarHorario()" class="btn-add">
-                        <i class="fas fa-plus"></i> Agregar
+                        <i class="fas fa-plus"></i> agregar
                     </button>
                 </div>
             </div>
             
             <div class="admin-card">
-                <h3><i class="fas fa-list"></i> Horarios disponibles</h3>
+                <h3><i class="fas fa-list"></i> horarios disponibles</h3>
                 <div id="horarios-list" class="horarios-admin-grid"></div>
             </div>
         </div>
 
-        <!-- Pestaña Días bloqueados -->
-        <div id="bloqueos-tab" class="tab-content fade-in">
+        <!-- Pestaña Bloqueos -->
+        <div id="bloqueos-tab" class="tab-content">
             <div class="admin-card">
-                <h3><i class="fas fa-ban"></i> Bloquear día completo</h3>
+                <h3><i class="fas fa-ban"></i> bloquear día</h3>
                 <div class="add-bloqueo">
                     <div class="input-group">
-                        <i class="fas fa-calendar-day"></i>
+                        <i class="far fa-calendar"></i>
                         <input type="date" id="fecha-bloqueo">
                     </div>
                     <div class="input-group">
-                        <i class="fas fa-pen"></i>
-                        <input type="text" id="motivo-bloqueo" placeholder="Motivo (opcional)">
+                        <i class="far fa-pen"></i>
+                        <input type="text" id="motivo-bloqueo" placeholder="motivo (opcional)">
                     </div>
                     <button onclick="bloquearDia()" class="btn-block">
-                        <i class="fas fa-lock"></i> Bloquear
+                        <i class="fas fa-lock"></i> bloquear
                     </button>
                 </div>
             </div>
             
             <div class="admin-card">
-                <h3><i class="fas fa-list"></i> Días bloqueados</h3>
+                <h3><i class="fas fa-list"></i> días bloqueados</h3>
                 <div id="bloqueos-list" class="bloqueos-grid"></div>
             </div>
         </div>
+
+        <!-- Footer con créditos -->
+        <footer class="site-footer admin-footer">
+            <div class="footer-divider"></div>
+            <p class="footer-text">
+                <i class="far fa-gem"></i>
+                desarrollado & diseñado por <strong>Orion Studios</strong>
+                <i class="far fa-gem"></i>
+            </p>
+        </footer>
     </div>
 
     <script src="app.js"></script>
@@ -124,8 +143,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             if (typeof initAdminPage === 'function') {
                 initAdminPage();
-            } else {
-                console.error('initAdminPage no está definida');
             }
         });
     </script>
