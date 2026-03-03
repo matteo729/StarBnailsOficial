@@ -19,11 +19,40 @@
 </head>
 <body class="admin-body">
     <div class="admin-container">
+        <!-- SISTEMA DE NOVEDADES MANUAL -->
+        <div id="novedades-panel" class="novedades-container" style="display: none;">
+            <div class="novedades-card">
+                <div class="novedades-header">
+                    <i class="far fa-star"></i>
+                    <h3>Novedades del sistema</h3>
+                    <button class="novedades-close" onclick="cerrarNovedades()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="novedades-body">
+                    <div class="novedades-contenido">
+                        <p class="novedades-fecha">📅 3 de marzo, 2026</p>
+                        <h4>Nueva actualización</h4>
+                        <ul class="novedades-lista">
+                            <li><i class="fas fa-check"></i> Optimización y mejoras de rendimiento del sitio web</li>
+                            <li><i class="fas fa-check"></i> Resolución de errores y fallos en la página del cliente</li>
+                            <li><i class="fas fa-check"></i> Ajustes y correcciones en el sistema de calendario de reservas</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="novedades-footer">
+                    <label class="novedades-checkbox">
+                        <input type="checkbox" id="noMostrarNovedades">
+                        <span>No mostrar más novedades</span>
+                    </label>
+                </div>
+            </div>
+        </div>
         <!-- Header admin -->
         <header class="admin-header">
             <div class="admin-header-content">
-                <h1><i class="far fa-crown"></i> StarBnails</h1>
-                <p>Panel de administración</p>
+                <div class="nombre"></i>StarBnails</h1></div>
+                <p>panel de administración</p>
             </div>
             <a href="index.html" class="btn-home">
                 <i class="fas fa-arrow-left"></i> volver al sitio
@@ -148,5 +177,3 @@
     </script>
 </body>
 </html>
-
-
