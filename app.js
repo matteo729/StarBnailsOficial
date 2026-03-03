@@ -821,3 +821,52 @@ window.eliminarTurno = eliminarTurno;
 window.closeModal = closeModal;
 window.initClientePage = initClientePage;
 window.initAdminPage = initAdminPage;
+
+// ========== SISTEMA DE NOVEDADES MANUAL ==========
+
+// Función para mostrar novedades
+function mostrarNovedades() {
+    const noMostrar = localStorage.getItem('starbnails_no_mostrar_novedades');
+    if (noMostrar === 'true') return;
+    
+    const panel = document.getElementById('novedades-panel');
+    if (panel) {
+        panel.style.display = 'flex';
+    }
+}
+
+// Función para cerrar novedades
+function cerrarNovedades() {
+    const panel = document.getElementById('novedades-panel');
+    if (panel) {
+        panel.style.display = 'none';
+    }
+    
+    const checkbox = document.getElementById('noMostrarNovedades');
+    if (checkbox && checkbox.checked) {
+        localStorage.setItem('starbnails_no_mostrar_novedades', 'true');
+    }
+}
+
+// Función para reiniciar (por si quiere volver a ver)
+function resetearNovedades() {
+    localStorage.removeItem('starbnails_no_mostrar_novedades');
+    mostrarNotificacion('las novedades volverán a mostrarse', 'success');
+}
+
+// Modificar initAdminPage para mostrar novedades
+const initAdminPageOriginal = initAdminPage;
+initAdminPage = function() {
+    if (initAdminPageOriginal) {
+        initAdminPageOriginal();
+    }
+    
+    // Mostrar novedades después de cargar
+    setTimeout(() => {
+        mostrarNovedades();
+    }, 1000);
+};
+
+// Hacer funciones globales
+window.cerrarNovedades = cerrarNovedades;
+window.resetearNovedades = resetearNovedades;
